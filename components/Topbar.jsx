@@ -1,12 +1,13 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Link } from "expo-router";
+import { Add } from './Icons';
 
 export function Topbar() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>TopBar</Text>
-      <Link href="/newCounter">
-        <Text style={styles.buttonText}>+</Text>
+      <Link asChild href="/0">
+        <Add />
       </Link>
     </View>
   );

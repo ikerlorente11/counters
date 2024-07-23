@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, StyleSheet, Text, Pressable } from "react-native";
+import { Link } from "expo-router";
 
 export function Counter({ counter }) {
   const [counterValue, setCounterValue] = useState(parseInt(counter.value));
@@ -20,12 +21,16 @@ export function Counter({ counter }) {
         <Text style={[styles.buttonText, { color: counter.color }]}>-</Text>
       </Pressable>
       <View style={styles.data}>
-        <Text style={[styles.title, { color: counter.color }]}>
-          {counter.title}
-        </Text>
-        <Text style={[styles.value, { color: counter.color }]}>
-          {counterValue}
-        </Text>
+        <Link href={`/${counter.id}`} asChild>
+          <Pressable style={ styles.data }>
+            <Text style={[styles.title, { color: counter.color }]}>
+              {counter.title}
+            </Text>
+            <Text style={[styles.value, { color: counter.color }]}>
+              {counterValue}
+            </Text>
+          </Pressable>
+        </Link>
       </View>
       <Pressable onPress={up} style={styles.button}>
         <Text style={[styles.buttonText, { color: counter.color }]}>+</Text>
@@ -44,10 +49,8 @@ const styles = StyleSheet.create({
     borderRadius: 17,
   },
   data: {
+    display: "flex",
     alignItems: "center",
-    // backgroundColor: "rgba(255, 255, 255, .3)",
-    padding: 3,
-    width: "50%",
   },
   title: {
     fontSize: 20,
