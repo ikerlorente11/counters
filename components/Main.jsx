@@ -3,12 +3,9 @@ import { useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Counter } from "./Counter";
 import { Topbar } from "./Topbar";
-import { CustomModal } from "./CustomModal";
-import { ColorSelector } from "./ColorSelector";
 
 export function Main() {
   const insets = useSafeAreaInsets();
-  const [modalVisible, setModalVisible] = useState(false);
   const [counters, setCounters] = useState([
     {
       id: 1,
@@ -103,14 +100,6 @@ export function Main() {
       ]}
     >
       <Topbar />
-      <View style={styles.centeredView}>
-        <CustomModal
-          modalVisible={modalVisible}
-          setModalVisible={setModalVisible}
-          title={"Select color"}
-          content={<ColorSelector />}
-        />
-      </View>
       <FlatList
         data={counters}
         keyExtractor={(counter) => counter.id}

@@ -1,13 +1,17 @@
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Pressable, Text } from "react-native";
 import ColorPicker, { HueCircular, Panel1 } from "reanimated-color-picker";
 
-export function ColorSelector() {
-  const [color, setColor] = useState("white");
+export function ColorSelector({ setModal, refColor, refSetColor }) {
+  const [color, setColor] = useState(refColor);
   const onSelectColor = ({ hex }) => {
     setColor(hex);
-    console.log(hex);
+    refSetColor(hex);
   };
+  const close = () => {
+    setModal(false)
+  };
+
   return (
     <View style={styles.pickerContainer}>
       <ColorPicker
@@ -24,6 +28,11 @@ export function ColorSelector() {
           <Panel1 style={styles.panelStyle} />
         </HueCircular>
       </ColorPicker>
+      <Pressable>
+        <Text onPress={close}>
+          Close
+        </Text>
+      </Pressable>
     </View>
   );
 }
