@@ -1,17 +1,13 @@
-import { View, Text, StyleSheet, Pressable, Modal } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import { Link } from "expo-router";
 
-export function Topbar({ setModalVisible }) {
+export function Topbar() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>TopBar</Text>
-      <Pressable
-        onPress={() => {
-          setModalVisible(true);
-        }}
-        style={styles.addButton}
-      >
+      <Link href="/newCounter">
         <Text style={styles.buttonText}>+</Text>
-      </Pressable>
+      </Link>
     </View>
   );
 }
@@ -22,6 +18,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: "100%",
     justifyContent: "space-between",
+    alignItems: "center",
+    paddingRight: 10,
   },
   text: {
     fontSize: 40,
