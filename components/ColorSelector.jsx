@@ -9,7 +9,7 @@ export function ColorSelector({ setModal, refColor, refSetColor }) {
     refSetColor(hex);
   };
   const close = () => {
-    setModal(false)
+    setModal(false);
   };
 
   return (
@@ -29,9 +29,7 @@ export function ColorSelector({ setModal, refColor, refSetColor }) {
         </HueCircular>
       </ColorPicker>
       <Pressable>
-        <Text onPress={close}>
-          Close
-        </Text>
+        <Text onPress={close}>Close</Text>
       </Pressable>
     </View>
   );

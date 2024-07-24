@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import { Link } from "expo-router";
+import { updateCounterValue } from "../app/database";
 
 export function Counter({ counter }) {
   const [counterValue, setCounterValue] = useState(parseInt(counter.value));
 
   const up = () => {
     setCounterValue(counterValue + 1);
+    updateCounterValue({ id: counter.id, value: counterValue + 1 });
   };
   const down = () => {
     setCounterValue(counterValue - 1);
+    updateCounterValue({ id: counter.id, value: counterValue - 1 });
   };
 
   return (
@@ -22,7 +25,7 @@ export function Counter({ counter }) {
       </Pressable>
       <View style={styles.data}>
         <Link href={`/${counter.id}`} asChild>
-          <Pressable style={ styles.data }>
+          <Pressable style={styles.data}>
             <Text style={[styles.title, { color: counter.color }]}>
               {counter.title}
             </Text>
