@@ -1,37 +1,19 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link } from "expo-router";
 import { Add } from "./Icons";
 
 export function Topbar() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>TopBar</Text>
-      <Link href="/0" asChild>
+    <View className="flex-row items-center justify-between px-3 py-2 bg-red-600">
+      <Text className="text-4xl font-bold" style={{ marginTop: insets.top }}>
+        TopBar
+      </Text>
+      <Link href="/0" asChild style={{ marginTop: insets.top }}>
         <Add />
       </Link>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "red",
-    flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingRight: 10,
-  },
-  text: {
-    fontSize: 40,
-    padding: 7,
-  },
-  addButton: {
-    width: 60,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonText: {
-    fontSize: 50,
-  },
-});

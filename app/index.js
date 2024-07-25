@@ -12,7 +12,7 @@ export default function Index() {
   return (
     <SafeAreaProvider>
       <View className="flex-1">
-        <StatusBar animated={true} backgroundColor="green" />
+        <StatusBar animated={true} backgroundColor="black" />
         <Main />
       </View>
     </SafeAreaProvider>

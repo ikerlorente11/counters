@@ -1,43 +1,22 @@
-import { Modal, StyleSheet, Text, View, Pressable } from "react-native";
+import { Modal, Text, View, Pressable } from "react-native";
+import { Button } from "./form/Button";
 export function CustomModal({ modalVisible, setModalVisible, title, content }) {
   return (
     <Modal animationType="slide" transparent={true} visible={modalVisible}>
-      <View style={styles.modal}>
-        <View style={styles.modalView}>
-          <View style={styles.header}>
-            <Text>{title}</Text>
-            <Pressable
-              onPress={() => {
-                setModalVisible(false);
-              }}
-            >
-              <Text style={styles.closeBtn}>X</Text>
-            </Pressable>
-          </View>
-          <View style={styles.body}>{content}</View>
+      <View className="items-center justify-center h-full">
+        <View className="w-2/3 px-5 py-3 bg-white rounded-md">
+          <Text className="mb-5 text-2xl">{title}</Text>
+          <View>{content}</View>
+          <Button
+            text="Cerrar"
+            color={"bg-green-500"}
+            custom={"w-2/3 mt-5 mx-auto"}
+            action={() => {
+              setModalVisible(false);
+            }}
+          />
         </View>
       </View>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  modal: {
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modalView: {
-    backgroundColor: "white",
-    width: "50%",
-    borderRadius: 10,
-    padding: 10,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  body: {
-    gap: 5,
-  },
-});
