@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import { Link } from "expo-router";
-import { updateCounterValue } from "../app/database";
+import { updateCounterValue } from "../app/db/database";
 
 export function Counter({ counter }) {
   const [counterValue, setCounterValue] = useState(parseInt(counter.value));

@@ -7,7 +7,7 @@ export default function Layout() {
     <View className="flex-1">
       <Stack
         screenOptions={{
-          header: () => <Topbar />,
+          header: () => <Topbar title={"Counters"} />,
         }}
       />
     </View>

@@ -1,0 +1,12 @@
+import { View, Text } from "react-native";
+
+export function Registry({ registry }) {
+  return (
+    <View className="flex-row items-center justify-around w-2/3 p-1 mx-auto bg-gray-200 border border-gray-400 rounded-md">
+      <Text className="w-1/2 text-2xl text-center border-r border-gray-400">
+        {registry.date}
+      </Text>
+      <Text className="w-1/2 text-2xl text-center">{registry.value}</Text>
+    </View>
+  );
+}

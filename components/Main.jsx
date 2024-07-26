@@ -2,7 +2,7 @@ import { View, FlatList } from "react-native";
 import { useState, useEffect } from "react";
 import { Counter } from "./Counter";
 
-import { getCounters } from "../app/database";
+import { getCounters } from "../app/db/database";
 
 export function Main() {
   const [counters, setCounters] = useState([]);

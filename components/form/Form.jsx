@@ -7,7 +7,7 @@ import {
   insertCounter,
   updateCounter,
   deleteCounter,
-} from "../../app/database";
+} from "../../app/db/database";
 
 import { LineText } from "./LineText";
 import { LineColor } from "./LineColor";
@@ -50,6 +50,7 @@ export function Form({ id }) {
       value: value,
       color: color,
       bgColor: bgColor,
+      valueUpdate: parseInt(getCounters(id).value) !== parseInt(value),
     });
     router.push("/");
   };
