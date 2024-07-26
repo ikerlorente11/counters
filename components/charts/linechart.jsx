@@ -4,20 +4,20 @@ import { LineChart } from "react-native-gifted-charts";
 const { width: screenWidth } = Dimensions.get("window");
 
 export function CustomLineChart({ data }) {
-  data = [
-    { value: 5, label: "26/6/2024", dataPointText: "5" },
-    { value: 6, label: "27/6/2024", dataPointText: "5" },
-    { value: 8, label: "28/6/2024", dataPointText: "5" },
-    { value: 10, label: "29/6/2024", dataPointText: "5" },
-    { value: 9, label: "30/6/2024", dataPointText: "5" },
-    { value: 15, label: "31/6/2024", dataPointText: "5" },
-    { value: 5, label: "26/7/2024", dataPointText: "5" },
-    { value: 6, label: "27/7/2024", dataPointText: "5" },
-    { value: 8, label: "28/7/2024", dataPointText: "5" },
-    { value: 10, label: "29/7/2024", dataPointText: "5" },
-    { value: 9, label: "30/7/2024", dataPointText: "5" },
-    { value: 15, label: "31/7/2024", dataPointText: "5" },
-  ];
+  // data = [
+  //   { value: 5, label: "26/6/2024", dataPointText: "5" },
+  //   { value: 6, label: "27/6/2024", dataPointText: "5" },
+  //   { value: 8, label: "28/6/2024", dataPointText: "5" },
+  //   { value: 10, label: "29/6/2024", dataPointText: "5" },
+  //   { value: 9, label: "30/6/2024", dataPointText: "5" },
+  //   { value: 15, label: "31/6/2024", dataPointText: "5" },
+  //   { value: 5, label: "26/7/2024", dataPointText: "5" },
+  //   { value: 6, label: "27/7/2024", dataPointText: "5" },
+  //   { value: 8, label: "28/7/2024", dataPointText: "5" },
+  //   { value: 10, label: "29/7/2024", dataPointText: "5" },
+  //   { value: 9, label: "30/7/2024", dataPointText: "5" },
+  //   { value: 15, label: "31/7/2024", dataPointText: "5" },
+  // ];
 
   const chartWidth = data.length * 52;
 
