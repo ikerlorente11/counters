@@ -23,9 +23,9 @@ export function Counter({ counter }) {
       <Pressable onPress={down} style={styles.button}>
         <Text style={[styles.buttonText, { color: counter.color }]}>-</Text>
       </Pressable>
-      <View style={styles.data}>
-        <Link href={`/${counter.id}`} asChild>
-          <Pressable style={styles.data}>
+      <View style={styles.data} className="w-3/5">
+        <Link href={`/counter/${counter.id}`} asChild>
+          <Pressable style={styles.data} className="w-full">
             <Text style={[styles.title, { color: counter.color }]}>
               {counter.title}
             </Text>

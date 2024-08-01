@@ -3,8 +3,10 @@ import * as SQLite from "expo-sqlite";
 const db = SQLite.openDatabaseSync("databaseName");
 
 const createTables = () => {
-  //   db.execSync("DROP TABLE IF EXISTS `Counters`;");
-  //   db.execSync("DROP TABLE IF EXISTS `CounterValues`;");
+  // db.execSync("DROP TABLE IF EXISTS `Counters`;");
+  // db.execSync("DROP TABLE IF EXISTS `CounterValues`;");
+  db.execSync('PRAGMA foreign_keys = ON;');
+
   db.execSync(
     `
     CREATE TABLE IF NOT EXISTS Counters (
@@ -22,9 +24,10 @@ const createTables = () => {
     CREATE TABLE IF NOT EXISTS CounterValues (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         counter_id INTEGER,
-        date TEXT UNIQUE,
+        date TEXT,
         value INTEGER,
-        FOREIGN KEY (counter_id) REFERENCES Counters(id)
+        FOREIGN KEY (counter_id) REFERENCES Counters(id) ON DELETE CASCADE,
+        UNIQUE (counter_id, date)
     );
       `,
   );
@@ -41,7 +44,7 @@ const getCounters = (id = null) => {
 const getCountersValues = (counter = null) => {
   if (counter) {
     return db.getAllSync(
-      "SELECT * FROM CounterValues WHERE counter_id =? order by date",
+      "SELECT * FROM CounterValues WHERE counter_id =? order by date desc",
       [counter],
     );
   }
@@ -90,7 +93,10 @@ const deleteCounter = ({ id }) => {
 
 const currentDate = () => {
   const date = new Date();
-  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  const day = date.getDate() > 9 ? date.getDate() : '0' + date.getDate()
+  const month = date.getMonth() + 1 > 9 ? date.getMonth() + 1 : '0' + (date.getMonth() + 1)
+  const year = date.getFullYear()
+  return `${day}/${month}/${year}`;
 };
 
 export {

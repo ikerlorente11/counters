@@ -11,3 +11,13 @@ export const Add = forwardRef((props, ref) => (
     {...props}
   />
 ));
+
+export const Edit = forwardRef((props, ref) => (
+  <FontAwesome6
+    name="edit"
+    size={35}
+    color="black"
+    ref={ref}
+    {...props}
+  />
+));
