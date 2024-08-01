@@ -1,7 +1,7 @@
 import { View, ScrollView, Dimensions } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 
-const { width: screenWidth } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 export function CustomLineChart({ data }) {
   // data = [
@@ -23,13 +23,14 @@ export function CustomLineChart({ data }) {
 
   return (
     <View className="py-3 pl-2 pr-5 m-auto mb-5 bg-blue-300 border rounded-lg h-1/3">
-      <ScrollView horizontal className="" width={screenWidth - 60}>
+      <ScrollView horizontal width={screenWidth - 60}>
         <LineChart
           data={data}
           hideRules
           thickness={4}
           color="grey"
           width={chartWidth > screenWidth ? chartWidth - 20 : screenWidth - 80}
+          height={screenHeight / 3 - 70 * 2}
           rotateLabel
           isAnimated
           hideYAxisText
