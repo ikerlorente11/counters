@@ -30,7 +30,7 @@ export function CustomLineChart({ data }) {
           thickness={4}
           color="grey"
           width={chartWidth > screenWidth ? chartWidth - 20 : screenWidth - 80}
-          height={screenHeight / 3 - 70 * 2}
+          height={screenHeight / 3 - 65 * 2}
           rotateLabel
           isAnimated
           hideYAxisText
