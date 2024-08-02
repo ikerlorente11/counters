@@ -15,7 +15,7 @@ export function Topbar({ title }) {
       <Text className="text-4xl font-bold" style={{ marginTop: insets.top }}>
         {title}
       </Text>
-      <Link href={`/counter/edit/${counterId || 0}`} asChild style={{ marginTop: insets.top }}>
+      <Link href={`/counter/edit/${counterId || 0}`} replace asChild style={{ marginTop: insets.top }}>
         {path === "/" ? <Add /> : regex.test(path) ? <Edit /> : null}
       </Link>
     </View>

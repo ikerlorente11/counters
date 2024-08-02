@@ -19,7 +19,7 @@ export default function CounterInfo() {
   const counterValues = getCountersValues(id);
   const data = counterValues.map((counter) => ({
     value: counter.value,
-    label: counter.date.substring(0,6) + counter.date.substring(8,10),
+    label: counter.date.substring(8,10) + "/" + counter.date.substring(5,7) + "/" + counter.date.substring(2,4),
     dataPointText: counter.value,
   }));
 

@@ -44,7 +44,7 @@ const getCounters = (id = null) => {
 const getCountersValues = (counter = null) => {
   if (counter) {
     return db.getAllSync(
-      "SELECT * FROM CounterValues WHERE counter_id =? order by date desc",
+      "SELECT * FROM CounterValues WHERE counter_id =? order by date",
       [counter],
     );
   }
@@ -96,7 +96,7 @@ const currentDate = () => {
   const day = date.getDate() > 9 ? date.getDate() : '0' + date.getDate()
   const month = date.getMonth() + 1 > 9 ? date.getMonth() + 1 : '0' + (date.getMonth() + 1)
   const year = date.getFullYear()
-  return `${day}/${month}/${year}`;
+  return `${year}/${month}/${day}`;
 };
 
 export {

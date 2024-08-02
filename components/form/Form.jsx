@@ -1,6 +1,7 @@
 import { View } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
+import { CommonActions } from '@react-navigation/native';
 
 import {
   getCounters,
@@ -40,7 +41,7 @@ export function Form({ id }) {
       color: color,
       bgColor: bgColor,
     });
-    router.push("/");
+    router.replace("/");;
   };
 
   const update = () => {
@@ -52,12 +53,12 @@ export function Form({ id }) {
       bgColor: bgColor,
       valueUpdate: parseInt(getCounters(id).value) !== parseInt(value),
     });
-    router.push("/");
+    router.replace("/");;
   };
 
   const remove = () => {
     deleteCounter({ id: id });
-    router.push("/");
+    router.replace("/");
   };
 
   return (
