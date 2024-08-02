@@ -4,11 +4,11 @@
     "slug": "counters",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/Logo.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "scheme": "counters",
     "splash": {
-      "image": "./assets/Logo.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/Logo.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.ikerlorente11.counters"
