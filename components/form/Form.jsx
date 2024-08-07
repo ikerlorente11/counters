@@ -73,10 +73,10 @@ export function Form({ id }) {
       <View className="flex-row justify-center mt-5" style={{ gap: 10 }}>
         <Button
           text="Guardar"
-          color={"bg-green-500"}
+          color={"bg-green-700 dark:bg-green-600"}
           action={id === 0 ? add : update}
         />
-        <Button text="Borrar" color={"bg-red-500"} action={remove} />
+        <Button text="Borrar" color={"bg-red-600 dark:bg-red-700"} action={remove} />
       </View>
     </View>
   );

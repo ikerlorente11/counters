@@ -8,7 +8,7 @@ export function LineColor({ name, value, state }) {
 
   return (
     <View className="flex-row items-center justify-between px-3 py-2">
-      <Text className="text-lg capitalize">{name}</Text>
+      <Text className="text-lg text-black capitalize dark:text-stone-50">{name}</Text>
       <Pressable
         onPress={() => {
           setModalVisible(true);

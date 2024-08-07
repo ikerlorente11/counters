@@ -24,8 +24,8 @@ export default function CounterInfo() {
   }));
 
   return (
-    <View className="h-full pb-3">
-      <Text className="py-3 text-2xl font-bold text-center">
+    <View className="h-full pb-3 bg-blue-300 dark:bg-stone-600">
+      <Text className="py-3 text-2xl font-bold text-center text-black dark:text-stone-50">
         Valores
       </Text>
       <CustomLineChart data={data} />
@@ -34,7 +34,7 @@ export default function CounterInfo() {
         keyExtractor={(value) => value.id}
         renderItem={({ item }) => <Registry registry={item} />}
         ItemSeparatorComponent={() => <View style={{ height: 5 }} />}
-        className="w-3/4 h-3 p-3 m-auto bg-blue-200 rounded-lg"
+        className="w-3/4 h-3 p-3 m-auto bg-blue-200 rounded-lg dark:bg-stone-500"
       />
     </View>
   );

@@ -1,9 +1,13 @@
 import { View, ScrollView, Dimensions } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
+import { useColorScheme } from "nativewind";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 export function CustomLineChart({ data }) {
+  const { colorScheme } = useColorScheme();
+  const color = colorScheme == "light" ? "black" : "white";
+
   // data = [
   //   { value: 5, label: "26/06/24", dataPointText: "5" },
   //   { value: 6, label: "27/06/24", dataPointText: "5" },
@@ -22,7 +26,7 @@ export function CustomLineChart({ data }) {
   const chartWidth = data.length * 52;
 
   return (
-    <View className="py-3 pl-2 pr-5 m-auto mb-5 bg-blue-300 border rounded-lg h-1/3">
+    <View className="py-3 pl-2 pr-5 m-auto mb-5 bg-blue-200 border rounded-lg dark:bg-stone-500 h-1/3">
       <ScrollView horizontal width={screenWidth - 60}>
         <LineChart
           data={data}
@@ -34,12 +38,14 @@ export function CustomLineChart({ data }) {
           rotateLabel
           isAnimated
           hideYAxisText
-          textColor1="black"
           textShiftY={-8}
           textFontSize={13}
-          xAxisLabelTextStyle={{ width: 80, marginLeft: -10, fontSize: 14, fontWeight: "bold" }}
+          xAxisLabelTextStyle={{ width: 80, marginLeft: -6, fontSize: 14, fontWeight: "bold", color: color }}
           curved
           curvature={0.1}
+          yAxisColor={color}
+          xAxisColor={color}
+          dataPointsColor1="black"
         />
       </ScrollView>
     </View>

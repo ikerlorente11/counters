@@ -30,7 +30,7 @@ export default function Index() {
 
   return (
     <SafeAreaProvider>
-      <View className="flex-1">
+      <View className="flex-1 bg-blue-300 dark:bg-stone-600">
         <StatusBar animated={true} backgroundColor="transparent" />
         <FlatList
           data={counters}
