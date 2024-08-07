@@ -4,7 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Counter } from "../components/Counter";
 import { createTables, getCounters } from "./db/database";
-import { useCounter } from './context';
+import { useCounter } from "./context";
 
 export default function Index() {
   useEffect(() => {
@@ -24,14 +24,14 @@ export default function Index() {
         backgroundColor: counter.bgColor,
       }));
       setCounters(countersData);
-      setCounterId(0)
-    }, [])
+      setCounterId(0);
+    }, []),
   );
 
   return (
     <SafeAreaProvider>
       <View className="flex-1">
-        <StatusBar animated={true} backgroundColor="black" />
+        <StatusBar animated={true} backgroundColor="transparent" />
         <FlatList
           data={counters}
           keyExtractor={(counter) => counter.id}

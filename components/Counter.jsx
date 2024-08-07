@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, StyleSheet, Text, Pressable } from "react-native";
 import { Link } from "expo-router";
 import { updateCounterValue } from "../app/db/database";
+import { Plus, Minus } from "./Icons";
 
 export function Counter({ counter }) {
   const [counterValue, setCounterValue] = useState(parseInt(counter.value));
@@ -21,7 +22,7 @@ export function Counter({ counter }) {
       key={counter.id}
     >
       <Pressable onPress={down} style={styles.button}>
-        <Text style={[styles.buttonText, { color: counter.color }]}>-</Text>
+        <Minus color={counter.color} size={40} />
       </Pressable>
       <View style={styles.data} className="w-3/5">
         <Link href={`/counter/${counter.id}`} asChild>
@@ -36,7 +37,7 @@ export function Counter({ counter }) {
         </Link>
       </View>
       <Pressable onPress={up} style={styles.button}>
-        <Text style={[styles.buttonText, { color: counter.color }]}>+</Text>
+        <Plus color={counter.color} size={40} />
       </Pressable>
     </View>
   );
