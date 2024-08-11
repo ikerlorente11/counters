@@ -27,7 +27,7 @@ export const Minus = forwardRef((props, ref) => (
 
 export const Light = forwardRef((props, ref) => (
   <MaterialCommunityIcons
-    name="lightbulb-variant-outline"
+    name="lightbulb-variant"
     size={24}
     color="black"
     {...props}
@@ -36,7 +36,7 @@ export const Light = forwardRef((props, ref) => (
 
 export const Dark = forwardRef((props, ref) => (
   <MaterialCommunityIcons
-    name="lightbulb-variant"
+    name="lightbulb-variant-outline"
     size={24}
     color="black"
     {...props}

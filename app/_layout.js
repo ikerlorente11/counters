@@ -4,15 +4,17 @@ import { Stack } from "expo-router";
 import { Topbar } from "../components/Topbar";
 import { CounterProvider } from './context';
 import { useColorScheme } from "nativewind";
-import { getConfig } from "../app/db/database";
+import { createTables, getConfig } from "../app/db/database";
 
 export default function Layout() {
   const { setColorScheme } = useColorScheme();
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);
 
   useEffect(() => {
+    createTables();
+    
     const loadTheme = async () => {
-      const storedTheme = await getConfig("theme");
+      const storedTheme = await getConfig("theme") === undefined ? "light" : getConfig("theme");
       setColorScheme(storedTheme);
       setIsThemeLoaded(true);
     };

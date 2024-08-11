@@ -45,7 +45,7 @@ const createTables = () => {
 
 // ---CONFIG--- //
 const getConfig = (field) => {
-  return db.getFirstSync("SELECT value FROM Config WHERE field =?", [field]).value;
+  return db.getFirstSync("SELECT value FROM Config WHERE field =?", [field])?.value;
 };
 
 const updateConfig = ({ field, value }) => {

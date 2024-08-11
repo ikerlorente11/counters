@@ -24,7 +24,7 @@ export function Topbar({ title }) {
       style={{ paddingTop: insets.top + 10 }}
     >
       <Pressable onPress={toggleColorScheme} className="z-10">
-        {colorScheme === "light" ? <Dark size={40} className="text-blue-100 dark:text-stone-100" /> : <Light size={40} className="text-blue-100 dark:text-stone-100" />}
+        {colorScheme === "dark" ? <Light size={40} className="text-blue-100 dark:text-stone-100" /> : <Dark size={40} className="text-blue-100 dark:text-stone-100" />}
       </Pressable>
       <Text className="absolute inset-x-0 z-0 mx-auto text-4xl font-bold text-center text-blue-100 dark:text-stone-100">{title}</Text>
       <Link href={`/counter/edit/${counterId || 0}`} className="z-10" asChild>
