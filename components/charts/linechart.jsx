@@ -31,20 +31,21 @@ export function CustomLineChart({ data }) {
         <LineChart
           data={data}
           hideRules
-          thickness={4}
-          color="grey"
+          thickness={2}
+          color={color}
           width={chartWidth > screenWidth ? chartWidth - 20 : screenWidth - 80}
-          height={screenHeight / 3 - 65 * 2}
+          height={screenHeight / 3 - 70 * 2}
           rotateLabel
           isAnimated
           hideYAxisText
           textShiftY={-8}
           textFontSize={13}
-          xAxisLabelTextStyle={{ width: 80, marginLeft: -6, fontSize: 14, fontWeight: "bold", color: color }}
+          xAxisLabelTextStyle={{ width: 60, marginLeft: 2, fontSize: 14, fontWeight: "bold", color: color }}
           curved
           curvature={0.1}
           yAxisColor={color}
           xAxisColor={color}
+          textColor1={color}
           dataPointsColor1="black"
         />
       </ScrollView>
