@@ -1,7 +1,6 @@
 import { View } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
-import { CommonActions } from '@react-navigation/native';
 
 import {
   getCounters,
@@ -58,6 +57,7 @@ export function Form({ id }) {
 
   const remove = () => {
     deleteCounter({ id: id });
+    router.dismissAll();
     router.replace("/");
   };
 

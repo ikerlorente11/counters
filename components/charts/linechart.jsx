@@ -6,7 +6,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 export function CustomLineChart({ data }) {
   const { colorScheme } = useColorScheme();
-  const color = colorScheme == "light" ? "black" : "white";
+  const color = colorScheme == "dark" ? "white" : "black";
 
   // data = [
   //   { value: 5, label: "26/06/24", dataPointText: "5" },

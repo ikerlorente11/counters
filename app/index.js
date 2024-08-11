@@ -1,12 +1,14 @@
 import { View, StatusBar, FlatList } from "react-native";
 import React, { useState, useEffect, useCallback } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused  } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Counter } from "../components/Counter";
-import { createTables, getCounters } from "./db/database";
+import { createTables, getConfig, getCounters } from "./db/database";
 import { useCounter } from "./context";
 
 export default function Index() {
+  const isFocused = useIsFocused();
+  
   useEffect(() => {
     createTables();
   }, []);
@@ -16,16 +18,18 @@ export default function Index() {
 
   useFocusEffect(
     useCallback(() => {
-      const countersData = getCounters().map((counter) => ({
-        id: counter.id,
-        title: counter.title,
-        value: counter.value,
-        color: counter.color,
-        backgroundColor: counter.bgColor,
-      }));
-      setCounters(countersData);
-      setCounterId(0);
-    }, []),
+      if (isFocused) {
+        const countersData = getCounters().map((counter) => ({
+          id: counter.id,
+          title: counter.title,
+          value: counter.value,
+          color: counter.color,
+          backgroundColor: counter.bgColor,
+        }));
+        setCounters(countersData);
+        setCounterId(0);
+      }
+    }, [isFocused]),
   );
 
   return (
