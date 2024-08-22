@@ -4,14 +4,16 @@ import { Link } from "expo-router";
 import { updateCounterValue } from "../app/db/database";
 import { Plus, Minus } from "./Icons";
 
-export function Counter({ counter }) {
+export function Counter({ counter, playSound }) {
   const [counterValue, setCounterValue] = useState(parseInt(counter.value));
 
   const up = () => {
+    playSound();
     setCounterValue(counterValue + 1);
     updateCounterValue({ id: counter.id, value: counterValue + 1 });
   };
   const down = () => {
+    playSound();
     setCounterValue(counterValue - 1);
     updateCounterValue({ id: counter.id, value: counterValue - 1 });
   };
