@@ -30,8 +30,11 @@ export function Counter({ counter, playSound }) {
       </Pressable>
       <View style={styles.data} className="w-3/5">
         <Link href={`/counter/${counter.id}`} asChild>
-          <Pressable style={styles.data} className="w-full">
-            <Text style={[styles.title, { color: "white" }]}>
+          <Pressable style={styles.data}>
+            <Text 
+              style={[styles.title, { color: "white" }]}
+              numberOfLines={1}
+              ellipsizeMode="tail">
               {counter.title}
             </Text>
             <Text style={[styles.value, { color: "white" }]}>
@@ -52,23 +55,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 5,
     borderRadius: 17,
     height: 100,
     backgroundColor: "#00000050",
   },
   data: {
-    display: "flex",
     alignItems: "center",
-    width: "50%",
+    width: "60%",
   },
   title: {
     fontSize: 20,
     userSelect: "none",
+    textAlign: "center",
+    width: "160%",
   },
   value: {
     fontSize: 40,
     userSelect: "none",
+    textAlign: "center",
+    width: "160%",
   },
   button: {
     padding: 5,

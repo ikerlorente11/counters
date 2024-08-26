@@ -25,6 +25,7 @@ export function CustomLineChart({ data }) {
 
   const chartWidth = data.length * 52;
   const maxVal = Math.max(...data.map(item => item.value));
+  const minVal = Math.min(...data.map(item => item.value));
 
   return (
     <View className="py-3 pl-2 pr-5 m-auto mb-5 bg-blue-200 border rounded-lg dark:bg-stone-500 h-1/3">
@@ -32,6 +33,7 @@ export function CustomLineChart({ data }) {
         <LineChart
           data={data}
           maxValue={maxVal + maxVal * 0.2}
+          yAxisOffset={minVal - minVal * 0.2}
           hideRules
           thickness={2}
           color={color}
