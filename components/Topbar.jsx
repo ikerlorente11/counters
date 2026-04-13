@@ -215,7 +215,7 @@ export function Topbar() {
           }}
           className="items-center justify-center flex-1 px-6 bg-black/35"
         >
-          <Pressable onPress={() => {}} className="w-full max-w-md p-4 border rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
+          <Pressable onPress={() => { }} className="w-full max-w-md p-4 border rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
             <Text className="text-xl font-black text-center text-stone-900 dark:text-stone-100">
               {t("report.title")}
             </Text>
@@ -334,8 +334,8 @@ export function Topbar() {
                       handleSelectLanguage(code);
                     }}
                     className={`flex-row items-center justify-between px-4 py-3 rounded-full border ${isSelectedLanguage
-                        ? "border-stone-900 dark:border-stone-100 bg-stone-900 dark:bg-stone-100"
-                        : "border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+                      ? "border-stone-900 dark:border-stone-100 bg-stone-900 dark:bg-stone-100"
+                      : "border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
                       }`}
                     accessibilityRole="button"
                     accessibilityLabel={t("topbar.selectLanguage", { language: t(`languages.${code}`) })}
