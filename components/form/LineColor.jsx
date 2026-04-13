@@ -2,6 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import { useState } from "react";
 import { CustomModal } from "../../components/CustomModal";
 import { ColorSelector } from "../../components/ColorSelector";
+import { useI18n } from "../../lib/i18n";
 import Color from "color";
 
 /**
@@ -23,6 +24,7 @@ function getSafePreviewColor(value) {
  * @returns {JSX.Element}
  */
 export function LineColor({ name, value, state }) {
+  const { t } = useI18n();
   const [modalVisible, setModalVisible] = useState(false);
   const safeColor = getSafePreviewColor(value);
   const [draftColor, setDraftColor] = useState(safeColor);
@@ -43,7 +45,7 @@ export function LineColor({ name, value, state }) {
         onPress={handleOpenModal}
         className="w-full h-12"
         accessibilityRole="button"
-        accessibilityLabel={`Select ${name.toLowerCase()} color`}
+        accessibilityLabel={t("form.selectNamedColor", { name: name.toLowerCase() })}
       >
         <View
           className="w-full h-full border rounded-2xl border-stone-300 dark:border-stone-700"
@@ -54,8 +56,8 @@ export function LineColor({ name, value, state }) {
       <CustomModal
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}
-        title={"Select color"}
-        confirmText="Apply"
+        title={t("form.selectColor")}
+        confirmText={t("form.apply")}
         onConfirm={handleConfirmColor}
         content={
           <ColorSelector

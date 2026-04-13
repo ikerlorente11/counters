@@ -2,6 +2,7 @@ import { View, Dimensions, Text } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { useColorScheme } from "nativewind";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useI18n } from "../../lib/i18n";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -11,6 +12,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
  * @returns {JSX.Element}
  */
 export function CustomLineChart({ data, latestValue = 0, resetSignal = 0 }) {
+  const { t, language } = useI18n();
   const { colorScheme } = useColorScheme();
   const chartColor = colorScheme === "dark" ? "#f5f5f4" : "#111827";
   const mutedColor = colorScheme === "dark" ? "#a8a29e" : "#57534e";
@@ -30,12 +32,15 @@ export function CustomLineChart({ data, latestValue = 0, resetSignal = 0 }) {
     ? Math.max(baseSpacing, (chartUsableWidth - initialSpacing - endSpacing) / (safeData.length - 1))
     : baseSpacing;
   const chartHeight = Math.max(130, containerMaxHeight - 128);
-  const labelStep =
+  const baseLabelStep =
     safeData.length <= 10 ? 1 :
       safeData.length <= 21 ? 3 :
         safeData.length <= 45 ? 5 :
           safeData.length <= 90 ? 10 :
             safeData.length <= 150 ? 14 : 21;
+  const minLabelGap = language === "es" ? 58 : 52;
+  const computedLabelStep = Math.max(1, Math.ceil(minLabelGap / Math.max(spacing, 1)));
+  const labelStep = Math.max(baseLabelStep, computedLabelStep);
   const chartData = safeData.map((item, index) => ({
     ...item,
     label: index % labelStep === 0 ? item.label : "",
@@ -59,7 +64,7 @@ export function CustomLineChart({ data, latestValue = 0, resetSignal = 0 }) {
     return (
       <View className="items-center justify-center w-full py-10 mb-4 border rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
         <Text className="text-base font-semibold text-stone-800 dark:text-stone-100">
-          No values available yet.
+          {t("chart.empty")}
         </Text>
       </View>
     );
@@ -82,24 +87,24 @@ export function CustomLineChart({ data, latestValue = 0, resetSignal = 0 }) {
       <View className="flex-row items-start justify-between mb-3">
         <View>
           <Text className="text-xs font-bold tracking-[2px] uppercase text-stone-500 dark:text-stone-400">
-            Trend
+            {t("chart.trend")}
           </Text>
           <Text className="mt-1 text-2xl font-black text-stone-900 dark:text-stone-100">
             {latestValue}
           </Text>
           <Text className="text-xs text-stone-600 dark:text-stone-300">
-            Current value
+            {t("chart.currentValue")}
           </Text>
         </View>
         <View className="items-end">
           <Text className="text-xs font-bold tracking-[2px] uppercase text-stone-500 dark:text-stone-400">
-            Range
+            {t("chart.range")}
           </Text>
           <Text className="mt-1 text-sm font-bold text-stone-900 dark:text-stone-100">
             {bottomValue} to {topValue}
           </Text>
           <Text className="text-xs text-stone-600 dark:text-stone-300">
-            {safeData.length} records
+            {t("chart.records", { count: safeData.length })}
           </Text>
         </View>
       </View>

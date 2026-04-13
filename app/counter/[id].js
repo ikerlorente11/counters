@@ -5,6 +5,7 @@ import { Registry } from "../../components/Registry";
 import { CustomLineChart } from "../../components/charts/linechart";
 import { useCounter } from "../../lib/counterContext";
 import { COUNTER_CHART_FILTERS, getCounterValuesForRange } from "../../lib/counterHistory";
+import { useI18n } from "../../lib/i18n";
 
 import { getCountersValues } from "../../lib/db/database";
 
@@ -13,6 +14,7 @@ import { getCountersValues } from "../../lib/db/database";
  * @returns {JSX.Element}
  */
 export default function CounterInfo() {
+  const { t } = useI18n();
   const [range, setRange] = useState("7d");
   const [chartLabelDismissSignal, setChartLabelDismissSignal] = useState(0);
   const { id: idParam } = useLocalSearchParams();
@@ -27,12 +29,16 @@ export default function CounterInfo() {
   const latestValue = counterValues[counterValues.length - 1]?.value ?? 0;
   const filteredCounterValues = useMemo(() => getCounterValuesForRange(counterValues, range), [counterValues, range]);
 
-  const data = filteredCounterValues.map((counter) => ({
-    value: counter.value,
-    dataPointText: `${counter.value}`,
-    label: counter.date.substring(8,10) + "/" + counter.date.substring(5,7),
-    fullLabel: counter.date.substring(8,10) + "/" + counter.date.substring(5,7) + "/" + counter.date.substring(2,4),
-  }));
+  const data = filteredCounterValues.map((counter) => {
+    const [year, month, day] = extractCounterDateParts(counter.date);
+
+    return {
+      value: counter.value,
+      dataPointText: `${counter.value}`,
+      label: `${month}/${day}`,
+      fullLabel: `${month}/${day}/${year.slice(-2)}`,
+    };
+  });
 
   return (
     <View
@@ -57,14 +63,14 @@ export default function CounterInfo() {
                   : "bg-stone-50 dark:bg-stone-900 border-stone-300 dark:border-stone-700"
               }`}
               accessibilityRole="button"
-              accessibilityLabel={`Show ${filter.label} chart range`}
+              accessibilityLabel={t("detail.showChartRange", { range: t(`filters.${filter.key}`) })}
             >
               <Text
                 className={`text-sm font-black uppercase ${
                   isActive ? "text-stone-100 dark:text-stone-900" : "text-stone-700 dark:text-stone-200"
                 }`}
               >
-                {filter.label}
+                {t(`filters.${filter.key}`)}
               </Text>
             </Pressable>
           );
@@ -84,7 +90,7 @@ export default function CounterInfo() {
 
       <View className="flex-1 min-h-0 mt-1">
         <Text className="mb-2 text-sm font-bold tracking-wide uppercase text-stone-500 dark:text-stone-400">
-          Registry
+          {t("detail.registry")}
         </Text>
         <View className="flex-1 p-3 border rounded-3xl border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900">
           <FlatList
@@ -95,7 +101,7 @@ export default function CounterInfo() {
             ListEmptyComponent={(
               <View className="items-center justify-center py-8 border rounded-2xl border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800">
                 <Text className="text-base font-semibold text-stone-700 dark:text-stone-200">
-                  No values recorded yet.
+                  {t("detail.emptyRegistry")}
                 </Text>
               </View>
             )}
@@ -108,4 +114,22 @@ export default function CounterInfo() {
       </View>
     </View>
   );
+}
+
+/**
+ * Parses persisted counter dates and guarantees compact chart date parts.
+ * @param {string} dateValue
+ * @returns {[string, string, string]}
+ */
+function extractCounterDateParts(dateValue) {
+  if (typeof dateValue === "string") {
+    const normalizedDate = dateValue.trim();
+    const isoMatch = normalizedDate.match(/^(\d{4})[-/](\d{2})[-/](\d{2})/);
+
+    if (isoMatch) {
+      return [isoMatch[1], isoMatch[2], isoMatch[3]];
+    }
+  }
+
+  return ["00", "00", "00"];
 }

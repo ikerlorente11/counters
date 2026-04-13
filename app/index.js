@@ -5,6 +5,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Counter } from "../components/Counter";
 import { getCounters } from "../lib/db/database";
 import { useCounter } from "../lib/counterContext";
+import { useI18n } from "../lib/i18n";
 import { createAudioPlayer, setIsAudioActiveAsync } from "expo-audio";
 
 /**
@@ -12,6 +13,7 @@ import { createAudioPlayer, setIsAudioActiveAsync } from "expo-audio";
  * @returns {JSX.Element}
  */
 export default function Index() {
+  const { t } = useI18n();
   const [counters, setCounters] = useState([]);
   const { setCounterId } = useCounter();
   const soundRef = useRef(null);
@@ -76,10 +78,10 @@ export default function Index() {
           ListEmptyComponent={(
             <View className="items-center justify-center px-6 py-12 mt-10 border border-dashed rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
               <Text className="text-xl font-bold text-center text-stone-800 dark:text-stone-100">
-                No counters yet
+                {t("home.emptyTitle")}
               </Text>
               <Text className="mt-2 text-base text-center text-stone-600 dark:text-stone-300">
-                Tap + on the top right to create your first one.
+                {t("home.emptyDescription")}
               </Text>
             </View>
           )}

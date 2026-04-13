@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Stack } from "expo-router";
 import { Topbar } from "../components/Topbar";
 import { CounterProvider } from "../lib/counterContext";
+import { I18nProvider } from "../lib/i18n";
 import { useColorScheme } from "nativewind";
 import { createTables, ensureDevelopmentPreviewCounter, getConfig } from "../lib/db/database";
 
@@ -22,6 +23,7 @@ if (typeof UIManager.setLayoutAnimationEnabledExperimental === "function") {
 export default function Layout() {
   const { setColorScheme } = useColorScheme();
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);
+  const [initialLanguage, setInitialLanguage] = useState("en");
 
   useEffect(() => {
     const tablesCreated = createTables();
@@ -35,7 +37,9 @@ export default function Layout() {
 
     const loadTheme = () => {
       const storedTheme = getConfig("theme") ?? "light";
+      const storedLanguage = getConfig("language") ?? "en";
       setColorScheme(storedTheme);
+      setInitialLanguage(storedLanguage);
       setIsThemeLoaded(true);
     };
 
@@ -45,15 +49,17 @@ export default function Layout() {
   if (!isThemeLoaded) {return null;}
   
   return (
-    <CounterProvider>
-      <View className="flex-1 bg-stone-100 dark:bg-stone-950">
-        <Stack
-          screenOptions={{
-            header: () => <Topbar title={"Counters"} />,
-            contentStyle: { backgroundColor: "transparent" },
-          }}
-        />
-      </View>
-    </CounterProvider>
+    <I18nProvider initialLanguage={initialLanguage}>
+      <CounterProvider>
+        <View className="flex-1 bg-stone-100 dark:bg-stone-950">
+          <Stack
+            screenOptions={{
+              header: () => <Topbar />,
+              contentStyle: { backgroundColor: "transparent" },
+            }}
+          />
+        </View>
+      </CounterProvider>
+    </I18nProvider>
   );
 }

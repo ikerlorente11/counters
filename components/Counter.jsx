@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { View, StyleSheet, Text, Pressable, Animated } from "react-native";
 import { Link } from "expo-router";
 import { updateCounterValue } from "../lib/db/database";
+import { useI18n } from "../lib/i18n";
 import { Plus, Minus } from "./Icons";
 import Color from "color";
 
@@ -31,6 +32,7 @@ function getSafeCardPalette(backgroundColor) {
  * @returns {JSX.Element}
  */
 export function Counter({ counter, playSound }) {
+  const { t } = useI18n();
   const [counterValue, setCounterValue] = useState(
     Number.parseInt(counter.value, 10) || 0,
   );
@@ -98,7 +100,7 @@ export function Counter({ counter, playSound }) {
         }}
         style={[styles.button, { backgroundColor: accentColor }]}
         accessibilityRole="button"
-        accessibilityLabel={`Decrement ${counter.title}`}
+        accessibilityLabel={t("counter.decrement", { title: counter.title })}
       >
         <Minus color={counter.color} size={22} />
       </Pressable>
@@ -127,7 +129,7 @@ export function Counter({ counter, playSound }) {
         }}
         style={[styles.button, { backgroundColor: accentColor }]}
         accessibilityRole="button"
-        accessibilityLabel={`Increment ${counter.title}`}
+        accessibilityLabel={t("counter.increment", { title: counter.title })}
       >
         <Plus color={counter.color} size={22} />
       </Pressable>

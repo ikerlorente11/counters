@@ -32,3 +32,4 @@ This project intentionally keeps exactly three top-level documentation files:
 
 - Migrated project to Expo SDK 54 with dependency alignment.
 - Applied dependency security remediation and verified zero npm audit vulnerabilities.
+- Added English and Spanish UI localization based on device language.

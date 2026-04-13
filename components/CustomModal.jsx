@@ -1,4 +1,5 @@
 import { Modal, Text, View } from "react-native";
+import { useI18n } from "../lib/i18n";
 import { Button } from "./form/Button";
 
 /**
@@ -14,6 +15,8 @@ export function CustomModal({
   confirmText,
   onConfirm,
 }) {
+  const { t } = useI18n();
+
   return (
     <Modal animationType="slide" transparent={true} visible={modalVisible}>
       <View className="items-center justify-center h-full px-4 bg-black/30">
@@ -22,7 +25,7 @@ export function CustomModal({
           <View>{content}</View>
           <View className="flex-row justify-center mt-5" style={{ gap: 10 }}>
             <Button
-              text={confirmText || "Close"}
+              text={confirmText || t("form.close")}
               color={"bg-stone-900"}
               custom={"mx-auto"}
               action={() => {
@@ -32,7 +35,7 @@ export function CustomModal({
             />
             {onConfirm ? (
               <Button
-                text="Cancel"
+                text={t("form.cancel")}
                 color={"bg-stone-300"}
                 textColor="text-stone-900"
                 custom={"mx-auto"}

@@ -4,10 +4,12 @@
 
 1. Users can create a counter with name, numeric value, text color, and background color.
 2. Users can update any existing counter.
-3. Users can delete a counter.
+3. Users can archive a counter from edit mode (soft delete).
 4. Users can increment and decrement from the home list.
 5. Users can open a counter and see history plus trend chart.
 6. Users can switch theme and the choice is persisted.
+7. Users see the interface in English or Spanish depending on device language.
+8. Users can recover archived counters from the create screen.
 
 ## Validation and input rules
 
@@ -21,7 +23,7 @@
 2. Insert counter and first history point are atomic.
 3. Counter update and optional history update are atomic.
 4. Increment/decrement update and history write are atomic.
-5. Deleting a counter cascades to historical values.
+5. Archiving a counter marks it as archived and keeps historical values for future recovery.
 
 ## UI state behavior
 
