@@ -10,6 +10,7 @@
 6. Users can switch theme and the choice is persisted.
 7. Users see the interface in English or Spanish depending on device language.
 8. Users can recover archived counters from the create screen.
+9. Users can open an annual report with year-end maximum values, copy it, and export it as PDF.
 
 ## Validation and input rules
 

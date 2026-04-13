@@ -2,11 +2,15 @@ import { View, Text, Pressable, Alert, Modal } from "react-native";
 import { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link, usePathname } from "expo-router";
+import * as Clipboard from "expo-clipboard";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Add, Edit } from './Icons';
 import { useCounter } from "../lib/counterContext";
 import { SUPPORTED_LANGUAGES, useI18n } from "../lib/i18n";
-import { getCounters, getCountersValues, updateConfig } from "../lib/db/database";
+import { getArchivedCounters, getCounters, getCountersValues, updateConfig } from "../lib/db/database";
+import { buildYearEndGroupedReport, buildYearEndReportText, buildYearSectionText } from "../lib/reporting";
 import { useColorScheme } from "nativewind";
 
 /**
@@ -25,6 +29,8 @@ export function Topbar() {
   const isCounterDetailPath = regex.test(path);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [reportGroups, setReportGroups] = useState([]);
 
   let actionIcon = null;
   let actionLabel = t("topbar.openAction");
@@ -61,24 +67,39 @@ export function Topbar() {
   };
 
   const handleShowReport = () => {
-    const counters = getCounters();
+    const counters = [...getCounters(), ...getArchivedCounters()];
     const registry = getCountersValues();
-    const totalCounters = Array.isArray(counters) ? counters.length : 0;
-    const totalRecords = Array.isArray(registry) ? registry.length : 0;
-    const totalValue = Array.isArray(counters)
-      ? counters.reduce((sum, counter) => sum + (Number.parseInt(counter.value, 10) || 0), 0)
-      : 0;
-
-    Alert.alert(
-      t("topbar.reportTitle"),
-      t("topbar.reportBody", {
-        counters: totalCounters,
-        records: totalRecords,
-        total: totalValue,
-      }),
-    );
+    setReportGroups(buildYearEndGroupedReport(counters, registry));
+    setIsReportModalVisible(true);
 
     setIsMenuOpen(false);
+  };
+
+  const handleCopyReport = async () => {
+    const reportText = buildYearEndReportText(reportGroups, t);
+    await Clipboard.setStringAsync(reportText);
+    Alert.alert(t("report.copySuccessTitle"), t("report.copySuccessBody"));
+  };
+
+  const handleCopyReportYear = async (yearGroup) => {
+    const reportText = buildYearSectionText(yearGroup, t);
+    await Clipboard.setStringAsync(reportText);
+    Alert.alert(t("report.copySuccessTitle"), t("report.copyYearSuccessBody", { year: yearGroup.year }));
+  };
+
+  const handleSaveReportPdf = async () => {
+    const reportHtml = buildReportHtml(reportGroups, t, colorScheme);
+    const { uri } = await Print.printToFileAsync({ html: reportHtml });
+
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(uri, {
+        mimeType: "application/pdf",
+        dialogTitle: t("report.savePdf"),
+      });
+      return;
+    }
+
+    Alert.alert(t("report.pdfReadyTitle"), uri);
   };
 
   return (
@@ -181,6 +202,106 @@ export function Topbar() {
       </Modal>
 
       <Modal
+        visible={isReportModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setIsReportModalVisible(false);
+        }}
+      >
+        <Pressable
+          onPress={() => {
+            setIsReportModalVisible(false);
+          }}
+          className="items-center justify-center flex-1 px-6 bg-black/35"
+        >
+          <Pressable onPress={() => {}} className="w-full max-w-md p-4 border rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
+            <Text className="text-xl font-black text-center text-stone-900 dark:text-stone-100">
+              {t("report.title")}
+            </Text>
+            <Text className="mt-1 mb-3 text-sm text-center text-stone-600 dark:text-stone-300">
+              {t("report.subtitle")}
+            </Text>
+
+            <View style={{ gap: 8 }}>
+              {reportGroups.length > 0 ? reportGroups.map((group) => (
+                <View
+                  key={group.year}
+                  className="px-4 py-3 border rounded-2xl border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Text className="text-sm font-black text-stone-900 dark:text-stone-100">
+                      {group.year}
+                    </Text>
+                    <Pressable
+                      onPress={() => {
+                        void handleCopyReportYear(group);
+                      }}
+                      className="items-center justify-center w-8 h-8 border rounded-lg border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
+                      accessibilityRole="button"
+                      accessibilityLabel={t("report.copyYear", { year: group.year })}
+                    >
+                      <MaterialCommunityIcons name="content-copy" size={15} color={iconColor} />
+                    </Pressable>
+                  </View>
+
+                  <View className="mt-1" style={{ gap: 4 }}>
+                    {group.items.map((item) => (
+                      <View
+                        key={`${group.year}-${item.counterId}`}
+                        className="flex-row items-center justify-between px-3 py-2 border rounded-xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
+                      >
+                        <Text numberOfLines={1} className="flex-1 pr-2 text-sm font-semibold text-stone-700 dark:text-stone-200">
+                          {item.counterTitle}
+                        </Text>
+                        <Text className="text-sm font-black text-stone-900 dark:text-stone-100">
+                          {t("report.itemValue", { value: item.value })}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )) : (
+                <View className="px-4 py-8 border rounded-2xl border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800">
+                  <Text className="text-sm font-semibold text-center text-stone-600 dark:text-stone-300">
+                    {t("report.empty")}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View className="flex-row justify-center mt-4" style={{ gap: 10 }}>
+              <Pressable
+                onPress={() => {
+                  void handleCopyReport();
+                }}
+                className="flex-1 px-4 py-3 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+                accessibilityRole="button"
+                accessibilityLabel={t("report.copyAll")}
+              >
+                <Text className="text-sm font-extrabold text-center text-stone-900 dark:text-stone-100">
+                  {t("report.copyAll")}
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={() => {
+                  void handleSaveReportPdf();
+                }}
+                className="flex-1 px-4 py-3 rounded-full bg-stone-900 dark:bg-stone-100"
+                accessibilityRole="button"
+                accessibilityLabel={t("report.savePdf")}
+              >
+                <Text className="text-sm font-extrabold text-center text-stone-100 dark:text-stone-900">
+                  {t("report.savePdf")}
+                </Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal
         visible={isLanguageModalVisible}
         transparent
         animationType="fade"
@@ -251,4 +372,48 @@ export function Topbar() {
       </Modal>
     </View>
   );
+}
+
+function buildReportHtml(reportGroups, t, colorScheme) {
+  const bodyRows = reportGroups.length > 0
+    ? reportGroups.map((group) => `
+        <tr>
+          <td colspan="4" style="padding: 12px 0 6px; font-weight: 800;">${group.year}</td>
+        </tr>
+        ${group.items.map((item) => `
+          <tr>
+            <td></td>
+            <td>${item.counterTitle}</td>
+            <td>${item.value}</td>
+            <td>${item.recordedAt}</td>
+          </tr>
+        `).join("")}
+      `).join("")
+    : `<tr><td colspan="4">${t("report.empty")}</td></tr>`;
+  const backgroundColor = colorScheme === "dark" ? "#111827" : "#f8fafc";
+  const cardColor = colorScheme === "dark" ? "#1f2937" : "#ffffff";
+  const textColor = colorScheme === "dark" ? "#f8fafc" : "#111827";
+  const borderColor = colorScheme === "dark" ? "#374151" : "#d6d3d1";
+
+  return `
+    <html>
+      <body style="font-family: Arial, sans-serif; background: ${backgroundColor}; color: ${textColor}; padding: 24px;">
+        <div style="background: ${cardColor}; border: 1px solid ${borderColor}; border-radius: 20px; padding: 24px;">
+          <h1 style="margin: 0 0 8px;">${t("report.title")}</h1>
+          <p style="margin: 0 0 16px; color: ${textColor};">${t("report.subtitle")}</p>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th style="text-align: left; border-bottom: 1px solid ${borderColor}; padding: 8px 0;">${t("report.year")}</th>
+                <th style="text-align: left; border-bottom: 1px solid ${borderColor}; padding: 8px 0;">${t("report.counter")}</th>
+                <th style="text-align: left; border-bottom: 1px solid ${borderColor}; padding: 8px 0;">${t("report.value")}</th>
+                <th style="text-align: left; border-bottom: 1px solid ${borderColor}; padding: 8px 0;">${t("report.date")}</th>
+              </tr>
+            </thead>
+            <tbody>${bodyRows}</tbody>
+          </table>
+        </div>
+      </body>
+    </html>
+  `;
 }
