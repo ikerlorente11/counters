@@ -16,11 +16,11 @@ export function Button({
   return (
     <Pressable
       onPress={action}
-      className={`justify-center w-1/3 h-12 font-bold ${color} ${custom} rounded-md`}
+      className={`justify-center min-w-36 h-12 px-4 ${color} ${custom} rounded-2xl`}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel || text}
     >
-      <Text className={`text-2xl font-bold text-center ${textColor}`}>
+      <Text className={`text-base font-extrabold tracking-wide text-center uppercase ${textColor}`}>
         {text}
       </Text>
     </Pressable>

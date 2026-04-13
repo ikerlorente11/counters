@@ -11,7 +11,7 @@ export default function CounterInfo() {
   const id = parseInt(idParam, 10);
 
   return (
-    <View className="h-full bg-blue-300 dark:bg-stone-600">
+    <View className="h-full px-4 bg-stone-100 dark:bg-stone-950">
       <Form id={id} />
     </View>
   );

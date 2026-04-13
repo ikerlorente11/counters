@@ -3,8 +3,8 @@ import { useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link, usePathname } from "expo-router";
 import { Add, Edit, Light, Dark } from './Icons';
-import { useCounter } from "../app/context";
-import { updateConfig } from "../app/db/database";
+import { useCounter } from "../lib/counterContext";
+import { updateConfig } from "../lib/db/database";
 import { useColorScheme } from "nativewind";
 
 /**
@@ -13,7 +13,7 @@ import { useColorScheme } from "nativewind";
  * @returns {JSX.Element}
  */
 export function Topbar({ title }) {
-  const { colorScheme, toggleColorScheme } = useColorScheme();
+  const { colorScheme, setColorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
   const path = usePathname();
   const regex = /^\/counter\/\d+$/;
@@ -25,10 +25,10 @@ export function Topbar({ title }) {
   let actionLabel = "Open action";
 
   if (isHomePath) {
-    actionIcon = <Add className="text-blue-100 dark:text-stone-100" />;
+    actionIcon = <Add className="text-stone-900 dark:text-stone-100" size={24} />;
     actionLabel = "Create counter";
   } else if (isCounterDetailPath) {
-    actionIcon = <Edit className="text-blue-100 dark:text-stone-100" />;
+    actionIcon = <Edit className="text-stone-900 dark:text-stone-100" size={24} />;
     actionLabel = "Edit counter";
   }
 
@@ -36,23 +36,40 @@ export function Topbar({ title }) {
     updateConfig({ field: "theme", value: colorScheme });
   }, [colorScheme]);
 
+  const handleToggleTheme = () => {
+    setColorScheme(colorScheme === "dark" ? "light" : "dark");
+  };
+
   return (
     <View
-      className="relative flex-row items-end justify-between px-3 py-2 bg-blue-600 dark:bg-stone-900"
-      style={{ paddingTop: insets.top + 10 }}
+      className="relative flex-row items-center justify-between px-4 pb-4 border-b bg-stone-100 dark:bg-stone-950 border-stone-200 dark:border-stone-800"
+      style={{ paddingTop: insets.top + 10, minHeight: insets.top + 72 }}
     >
       <Pressable
-        onPress={toggleColorScheme}
-        className="z-10"
+        onPress={handleToggleTheme}
+        className="z-10 items-center justify-center w-11 h-11 rounded-2xl bg-stone-200 dark:bg-stone-800"
         accessibilityRole="button"
         accessibilityLabel="Toggle application theme"
       >
-        {colorScheme === "dark" ? <Light size={40} className="text-blue-100 dark:text-stone-100" /> : <Dark size={40} className="text-blue-100 dark:text-stone-100" />}
+        {colorScheme === "dark" ? (
+          <Light size={22} className="text-stone-900 dark:text-stone-100" />
+        ) : (
+          <Dark size={22} className="text-stone-900 dark:text-stone-100" />
+        )}
       </Pressable>
-      <Text className="absolute inset-x-0 z-0 mx-auto text-4xl font-bold text-center text-blue-100 dark:text-stone-100">{title}</Text>
+      <Text
+        pointerEvents="none"
+        className="absolute inset-x-0 z-0 self-center mx-auto text-3xl font-black tracking-tight text-center text-stone-900 dark:text-stone-100"
+      >
+        {title}
+      </Text>
       {actionIcon ? (
         <Link href={`/counter/edit/${counterId || 0}`} className="z-10" asChild>
-          <Pressable accessibilityRole="button" accessibilityLabel={actionLabel}>
+          <Pressable
+            className="items-center justify-center w-11 h-11 rounded-2xl bg-stone-200 dark:bg-stone-800"
+            accessibilityRole="button"
+            accessibilityLabel={actionLabel}
+          >
             {actionIcon}
           </Pressable>
         </Link>

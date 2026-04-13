@@ -1,18 +1,38 @@
-import { Alert, View } from "react-native";
+import { Alert, View, Text } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
+import { useColorScheme } from "nativewind";
 
 import {
   getCounters,
   insertCounter,
   updateCounter,
   deleteCounter,
-} from "../../app/db/database";
+} from "../../lib/db/database";
 import { buildValidatedCounterPayload } from "../../lib/counterValidation";
 
 import { LineText } from "./LineText";
 import { LineColor } from "./LineColor";
 import { Button } from "./Button";
+
+/**
+ * Returns default counter colors based on current theme.
+ * @param {"light" | "dark" | null | undefined} scheme
+ * @returns {{color: string, bgColor: string}}
+ */
+function getDefaultCounterColors(scheme) {
+  if (scheme === "dark") {
+    return {
+      color: "#f8fafc",
+      bgColor: "#111827",
+    };
+  }
+
+  return {
+    color: "#111827",
+    bgColor: "#e2e8f0",
+  };
+}
 
 /**
  * Counter form used for create and edit flows.
@@ -21,11 +41,13 @@ import { Button } from "./Button";
  */
 export function Form({ id }) {
   const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const defaultColors = getDefaultCounterColors(colorScheme);
 
   const [title, setTitle] = useState("Counter");
   const [value, setValue] = useState("0");
-  const [color, setColor] = useState("white");
-  const [bgColor, setBgColor] = useState("black");
+  const [color, setColor] = useState(defaultColors.color);
+  const [bgColor, setBgColor] = useState(defaultColors.bgColor);
 
   const getValidatedPayload = () => {
     const validationResult = buildValidatedCounterPayload({
@@ -54,6 +76,14 @@ export function Form({ id }) {
       }
     }
   }, [id]);
+
+  useEffect(() => {
+    if (id === 0) {
+      const nextDefaults = getDefaultCounterColors(colorScheme);
+      setColor(nextDefaults.color);
+      setBgColor(nextDefaults.bgColor);
+    }
+  }, [id, colorScheme]);
 
   const add = () => {
     const payload = getValidatedPayload();
@@ -112,9 +142,15 @@ export function Form({ id }) {
   };
 
   return (
-    <View className="">
-      <View></View>
-      <View>
+    <View className="pt-3">
+      <Text className="text-3xl font-black tracking-tight text-stone-900 dark:text-stone-100">
+        {id === 0 ? "Create counter" : "Edit counter"}
+      </Text>
+      <Text className="mt-1 mb-5 text-base text-stone-600 dark:text-stone-300">
+        Keep it simple: name, initial value, and colors.
+      </Text>
+
+      <View className="px-4 py-3 border rounded-3xl border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900">
         <LineText name="Name" value={title} state={setTitle} />
         <LineText
           name="Value"
@@ -125,19 +161,23 @@ export function Form({ id }) {
         <LineColor name="Color" value={color} state={setColor} />
         <LineColor name="Background" value={bgColor} state={setBgColor} />
       </View>
+
       <View className="flex-row justify-center mt-5" style={{ gap: 10 }}>
         <Button
           text="Save"
-          color={"bg-green-700 dark:bg-green-600"}
+          color={"bg-stone-900 dark:bg-stone-200"}
+          textColor="text-stone-100 dark:text-stone-900"
           action={id === 0 ? add : update}
           accessibilityLabel="Save counter"
         />
-        <Button
-          text="Delete"
-          color={"bg-red-600 dark:bg-red-700"}
-          action={remove}
-          accessibilityLabel="Delete counter"
-        />
+        {id !== 0 ? (
+          <Button
+            text="Delete"
+            color={"bg-red-700 dark:bg-red-600"}
+            action={remove}
+            accessibilityLabel="Delete counter"
+          />
+        ) : null}
       </View>
     </View>
   );

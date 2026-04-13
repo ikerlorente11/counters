@@ -1,6 +1,22 @@
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import ColorPicker, { HueCircular, Panel1 } from "reanimated-color-picker";
+import Color from "color";
+
+const DEFAULT_PICKER_COLOR = "#111827";
+
+/**
+ * Ensures the picker always receives a valid hex string.
+ * @param {string | null | undefined} value
+ * @returns {string}
+ */
+function toSafeHex(value) {
+  try {
+    return Color(value || DEFAULT_PICKER_COLOR).hex();
+  } catch {
+    return DEFAULT_PICKER_COLOR;
+  }
+}
 
 /**
  * Color picker used inside the color selection modal.
@@ -8,10 +24,12 @@ import ColorPicker, { HueCircular, Panel1 } from "reanimated-color-picker";
  * @returns {JSX.Element}
  */
 export function ColorSelector({ refColor, refSetColor }) {
-  const [color, setColor] = useState(refColor);
-  const onSelectColor = ({ hex }) => {
-    setColor(hex);
-    refSetColor(hex);
+  const [color, setColor] = useState(toSafeHex(refColor));
+
+  const handleColorChange = (selectedColor) => {
+    const nextColor = toSafeHex(selectedColor?.hex);
+    setColor(nextColor);
+    refSetColor(nextColor);
   };
 
   return (
@@ -20,7 +38,8 @@ export function ColorSelector({ refColor, refSetColor }) {
         value={color}
         sliderThickness={20}
         thumbSize={24}
-        onComplete={onSelectColor}
+        onChangeJS={handleColorChange}
+        onCompleteJS={handleColorChange}
         boundedThumb
       >
         <HueCircular

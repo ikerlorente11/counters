@@ -3,24 +3,45 @@ import { Button } from "./form/Button";
 
 /**
  * Generic modal wrapper used for picker-like interactions.
- * @param {{modalVisible: boolean, setModalVisible: (visible: boolean) => void, title: string, content: JSX.Element}} props
+ * @param {{modalVisible: boolean, setModalVisible: (visible: boolean) => void, title: string, content: JSX.Element, confirmText?: string, onConfirm?: () => void}} props
  * @returns {JSX.Element}
  */
-export function CustomModal({ modalVisible, setModalVisible, title, content }) {
+export function CustomModal({
+  modalVisible,
+  setModalVisible,
+  title,
+  content,
+  confirmText,
+  onConfirm,
+}) {
   return (
     <Modal animationType="slide" transparent={true} visible={modalVisible}>
-      <View className="items-center justify-center h-full">
-        <View className="w-2/3 px-5 py-3 bg-white rounded-md">
-          <Text className="mb-5 text-2xl">{title}</Text>
+      <View className="items-center justify-center h-full px-4 bg-black/30">
+        <View className="w-full max-w-md px-5 py-4 border rounded-3xl border-stone-300 bg-stone-50">
+          <Text className="mb-4 text-2xl font-black tracking-tight text-stone-900">{title}</Text>
           <View>{content}</View>
-          <Button
-            text="Close"
-            color={"bg-green-500"}
-            custom={"w-2/3 mt-5 mx-auto"}
-            action={() => {
-              setModalVisible(false);
-            }}
-          />
+          <View className="flex-row justify-center mt-5" style={{ gap: 10 }}>
+            <Button
+              text={confirmText || "Close"}
+              color={"bg-stone-900"}
+              custom={"mx-auto"}
+              action={() => {
+                onConfirm?.();
+                setModalVisible(false);
+              }}
+            />
+            {onConfirm ? (
+              <Button
+                text="Cancel"
+                color={"bg-stone-300"}
+                textColor="text-stone-900"
+                custom={"mx-auto"}
+                action={() => {
+                  setModalVisible(false);
+                }}
+              />
+            ) : null}
+          </View>
         </View>
       </View>
     </Modal>

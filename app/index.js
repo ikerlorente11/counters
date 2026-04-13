@@ -1,11 +1,11 @@
-import { View, StatusBar, FlatList } from "react-native";
+import { View, StatusBar, FlatList, Text } from "react-native";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Counter } from "../components/Counter";
-import { getCounters } from "./db/database";
-import { useCounter } from "./context";
-import { Audio } from "expo-av";
+import { getCounters } from "../lib/db/database";
+import { useCounter } from "../lib/counterContext";
+import { createAudioPlayer, setIsAudioActiveAsync } from "expo-audio";
 
 /**
  * Main screen listing all counters and handling tap audio lifecycle.
@@ -19,9 +19,10 @@ export default function Index() {
   useEffect(() => {
     const loadSound = async () => {
       try {
-        const { sound } = await Audio.Sound.createAsync(require("../assets/tap.mp3"));
-        await sound.setVolumeAsync(0.3);
-        soundRef.current = sound;
+        await setIsAudioActiveAsync(true);
+        const player = createAudioPlayer(require("../assets/tap.mp3"));
+        player.volume = 0.3;
+        soundRef.current = player;
       } catch (error) {
         console.error("Failed to load tap sound:", error);
       }
@@ -31,7 +32,7 @@ export default function Index() {
 
     return () => {
       if (soundRef.current) {
-        void soundRef.current.unloadAsync();
+        soundRef.current.remove();
         soundRef.current = null;
       }
     };
@@ -43,7 +44,8 @@ export default function Index() {
     }
 
     try {
-      await soundRef.current.replayAsync();
+      soundRef.current.seekTo(0);
+      soundRef.current.play();
     } catch (error) {
       console.error("Failed to replay tap sound:", error);
     }
@@ -65,14 +67,25 @@ export default function Index() {
 
   return (
     <SafeAreaProvider>
-      <View className="flex-1 bg-blue-300 dark:bg-stone-600">
-        <StatusBar animated={true} backgroundColor="transparent" />
+      <View className="flex-1 bg-stone-100 dark:bg-stone-950">
+        <StatusBar animated={true} backgroundColor="transparent" barStyle="light-content" />
         <FlatList
           data={counters}
           keyExtractor={(counter) => counter.id.toString()}
           renderItem={({ item }) => <Counter counter={item} playSound={playSound} />}
-          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-          className="w-full px-3 mt-3 mb-2"
+          ListEmptyComponent={(
+            <View className="items-center justify-center px-6 py-12 mt-10 border border-dashed rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
+              <Text className="text-xl font-bold text-center text-stone-800 dark:text-stone-100">
+                No counters yet
+              </Text>
+              <Text className="mt-2 text-base text-center text-stone-600 dark:text-stone-300">
+                Tap + on the top right to create your first one.
+              </Text>
+            </View>
+          )}
+          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+          className="w-full px-4 mt-4 mb-3"
+          contentContainerStyle={{ paddingBottom: 24, flexGrow: counters.length === 0 ? 1 : undefined }}
         />
       </View>
     </SafeAreaProvider>
