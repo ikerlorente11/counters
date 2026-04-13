@@ -1,5 +1,11 @@
-import { Modal, Text, View, Pressable } from "react-native";
+import { Modal, Text, View } from "react-native";
 import { Button } from "./form/Button";
+
+/**
+ * Generic modal wrapper used for picker-like interactions.
+ * @param {{modalVisible: boolean, setModalVisible: (visible: boolean) => void, title: string, content: JSX.Element}} props
+ * @returns {JSX.Element}
+ */
 export function CustomModal({ modalVisible, setModalVisible, title, content }) {
   return (
     <Modal animationType="slide" transparent={true} visible={modalVisible}>
@@ -8,7 +14,7 @@ export function CustomModal({ modalVisible, setModalVisible, title, content }) {
           <Text className="mb-5 text-2xl">{title}</Text>
           <View>{content}</View>
           <Button
-            text="Cerrar"
+            text="Close"
             color={"bg-green-500"}
             custom={"w-2/3 mt-5 mx-auto"}
             action={() => {

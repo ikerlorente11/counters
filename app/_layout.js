@@ -6,15 +6,24 @@ import { CounterProvider } from './context';
 import { useColorScheme } from "nativewind";
 import { createTables, getConfig } from "../app/db/database";
 
+/**
+ * Root layout that initializes app state and top-level navigation shell.
+ * @returns {JSX.Element | null}
+ */
 export default function Layout() {
   const { setColorScheme } = useColorScheme();
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);
 
   useEffect(() => {
-    createTables();
-    
-    const loadTheme = async () => {
-      const storedTheme = await getConfig("theme") === undefined ? "light" : getConfig("theme");
+    const tablesCreated = createTables();
+    if (!tablesCreated) {
+      setColorScheme("light");
+      setIsThemeLoaded(true);
+      return;
+    }
+
+    const loadTheme = () => {
+      const storedTheme = getConfig("theme") ?? "light";
       setColorScheme(storedTheme);
       setIsThemeLoaded(true);
     };

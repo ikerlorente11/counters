@@ -2,6 +2,10 @@ import { View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { Form } from "../../../components/form/Form";
 
+/**
+ * Counter create/edit route wrapper.
+ * @returns {JSX.Element}
+ */
 export default function CounterInfo() {
   const { id: idParam } = useLocalSearchParams();
   const id = parseInt(idParam, 10);

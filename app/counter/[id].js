@@ -7,6 +7,10 @@ import { useCounter } from '../context';
 
 import { getCountersValues } from "../db/database";
 
+/**
+ * Counter detail screen showing value history and trend chart.
+ * @returns {JSX.Element}
+ */
 export default function CounterInfo() {
   const { id: idParam } = useLocalSearchParams();
   const id = parseInt(idParam, 10);
@@ -26,12 +30,12 @@ export default function CounterInfo() {
   return (
     <View className="h-full pb-3 bg-blue-300 dark:bg-stone-600">
       <Text className="py-3 text-2xl font-bold text-center text-black dark:text-stone-50">
-        Valores
+        Values
       </Text>
       <CustomLineChart data={data} />
       <FlatList
         data={counterValues}
-        keyExtractor={(value) => value.id}
+        keyExtractor={(value) => value.id.toString()}
         renderItem={({ item }) => <Registry registry={item} />}
         ItemSeparatorComponent={() => <View style={{ height: 5 }} />}
         className="w-3/4 h-3 p-3 m-auto bg-blue-200 rounded-lg dark:bg-stone-500"

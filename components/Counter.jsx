@@ -5,19 +5,33 @@ import { updateCounterValue } from "../app/db/database";
 import { Plus, Minus } from "./Icons";
 import Color from "color";
 
+/**
+ * Interactive counter card with increment/decrement actions.
+ * @param {{counter: {id: number, title: string, value: number | string, color: string, backgroundColor: string}, playSound?: () => Promise<void>}} props
+ * @returns {JSX.Element}
+ */
 export function Counter({ counter, playSound }) {
-  const [counterValue, setCounterValue] = useState(parseInt(counter.value));
+  const [counterValue, setCounterValue] = useState(
+    Number.parseInt(counter.value, 10) || 0,
+  );
   const bg_color = Color(counter.backgroundColor).desaturate(0.3).hex();
 
-  const up = () => {
-    // playSound();
-    setCounterValue(counterValue + 1);
-    updateCounterValue({ id: counter.id, value: counterValue + 1 });
+  const handleIncrement = () => {
+    setCounterValue((previousValue) => {
+      const nextValue = previousValue + 1;
+      updateCounterValue({ id: counter.id, value: nextValue });
+      void playSound?.();
+      return nextValue;
+    });
   };
-  const down = () => {
-    // playSound();
-    setCounterValue(counterValue - 1);
-    updateCounterValue({ id: counter.id, value: counterValue - 1 });
+
+  const handleDecrement = () => {
+    setCounterValue((previousValue) => {
+      const nextValue = previousValue - 1;
+      updateCounterValue({ id: counter.id, value: nextValue });
+      void playSound?.();
+      return nextValue;
+    });
   };
 
   return (
@@ -25,13 +39,18 @@ export function Counter({ counter, playSound }) {
       style={[styles.counter, { borderColor: bg_color, borderWidth: 5 }]}
       key={counter.id}
     >
-      <Pressable onPress={down} style={[styles.button, { backgroundColor: bg_color }]}>
+      <Pressable
+        onPress={handleDecrement}
+        style={[styles.button, { backgroundColor: bg_color }]}
+        accessibilityRole="button"
+        accessibilityLabel={`Decrement ${counter.title}`}
+      >
         <Minus color={counter.color} size={40} />
       </Pressable>
       <View style={styles.data} className="w-3/5">
         <Link href={`/counter/${counter.id}`} asChild>
           <Pressable style={styles.data}>
-            <Text 
+            <Text
               style={[styles.title, { color: "white" }]}
               numberOfLines={1}
               ellipsizeMode="tail">
@@ -43,7 +62,12 @@ export function Counter({ counter, playSound }) {
           </Pressable>
         </Link>
       </View>
-      <Pressable onPress={up} style={[styles.button, { backgroundColor: bg_color }]}>
+      <Pressable
+        onPress={handleIncrement}
+        style={[styles.button, { backgroundColor: bg_color }]}
+        accessibilityRole="button"
+        accessibilityLabel={`Increment ${counter.title}`}
+      >
         <Plus color={counter.color} size={40} />
       </Pressable>
     </View>

@@ -3,6 +3,11 @@ import { useState } from "react";
 import { CustomModal } from "../../components/CustomModal";
 import { ColorSelector } from "../../components/ColorSelector";
 
+/**
+ * Form row for selecting a color with modal picker.
+ * @param {{name: string, value: string, state: (value: string) => void}} props
+ * @returns {JSX.Element}
+ */
 export function LineColor({ name, value, state }) {
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -27,7 +32,6 @@ export function LineColor({ name, value, state }) {
         title={"Select color"}
         content={
           <ColorSelector
-            setModal={setModalVisible}
             refColor={value}
             refSetColor={state}
           />

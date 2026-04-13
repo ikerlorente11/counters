@@ -2,6 +2,11 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import ColorPicker, { HueCircular, Panel1 } from "reanimated-color-picker";
 
+/**
+ * Color picker used inside the color selection modal.
+ * @param {{refColor: string, refSetColor: (color: string) => void}} props
+ * @returns {JSX.Element}
+ */
 export function ColorSelector({ refColor, refSetColor }) {
   const [color, setColor] = useState(refColor);
   const onSelectColor = ({ hex }) => {

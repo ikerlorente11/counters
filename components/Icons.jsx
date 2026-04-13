@@ -18,11 +18,11 @@ export const Edit = forwardRef((props, ref) => (
 ));
 
 export const Plus = forwardRef((props, ref) => (
-  <FontAwesome6 name="plus" size={24} color="black" {...props} />
+  <FontAwesome6 name="plus" size={24} color="black" ref={ref} {...props} />
 ));
 
 export const Minus = forwardRef((props, ref) => (
-  <FontAwesome6 name="minus" size={24} color="black" {...props} />
+  <FontAwesome6 name="minus" size={24} color="black" ref={ref} {...props} />
 ));
 
 export const Light = forwardRef((props, ref) => (
@@ -30,6 +30,7 @@ export const Light = forwardRef((props, ref) => (
     name="lightbulb-variant"
     size={24}
     color="black"
+    ref={ref}
     {...props}
   />
 ));
@@ -39,6 +40,7 @@ export const Dark = forwardRef((props, ref) => (
     name="lightbulb-variant-outline"
     size={24}
     color="black"
+    ref={ref}
     {...props}
   />
 ));
