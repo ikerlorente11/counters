@@ -39,7 +39,6 @@ function getSafeCardPalette(backgroundColor) {
  * Counter card with press actions and drag-and-drop reorder support.
  * @param {{
  * counter: {id: number, title: string, value: number | string, color: string, backgroundColor: string},
- * playSound?: () => Promise<void>,
  * layoutMode?: "list" | "grid",
  * isDragging?: boolean,
  * shouldAnimateLayout?: boolean,
@@ -52,7 +51,6 @@ function getSafeCardPalette(backgroundColor) {
  */
 export function DraggableCounter({
     counter,
-    playSound,
     layoutMode = "list",
     isDragging = false,
     shouldAnimateLayout = false,
@@ -88,7 +86,6 @@ export function DraggableCounter({
         setCounterValue((previousValue) => {
             const nextValue = previousValue + 1;
             updateCounterValue({ id: counter.id, value: nextValue });
-            void playSound?.();
             return nextValue;
         });
     };
@@ -97,7 +94,6 @@ export function DraggableCounter({
         setCounterValue((previousValue) => {
             const nextValue = previousValue - 1;
             updateCounterValue({ id: counter.id, value: nextValue });
-            void playSound?.();
             return nextValue;
         });
     };

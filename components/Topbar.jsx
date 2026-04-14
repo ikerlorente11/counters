@@ -1,5 +1,5 @@
-import { View, Text, Pressable, Modal } from "react-native";
-import { useEffect, useState } from "react";
+import { View, Text, Pressable, Modal, ScrollView, useWindowDimensions, InteractionManager, StyleSheet, Animated } from "react-native";
+import { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link, usePathname } from "expo-router";
 import * as Clipboard from "expo-clipboard";
@@ -12,7 +12,7 @@ import { SUPPORTED_LANGUAGES, useI18n } from "../lib/i18n";
 import { useToast } from "../lib/toastProvider";
 import { DEFAULT_LAYOUT_MODE, GRID_LAYOUT_MODE } from "../lib/layoutMode";
 import { getArchivedCounters, getCounters, getCountersValues, updateConfig } from "../lib/db/database";
-import { buildYearEndGroupedReport, buildYearEndReportText, buildYearSectionText } from "../lib/reporting";
+import { buildYearEndGroupedReport, buildYearEndReportText, buildYearSectionText, toggleExpandedReportYear } from "../lib/reporting";
 import { useColorScheme } from "nativewind";
 
 /**
@@ -23,6 +23,7 @@ export function Topbar() {
   const { t, language, setLanguage } = useI18n();
   const toast = useToast();
   const { colorScheme, setColorScheme } = useColorScheme();
+  const { height: windowHeight } = useWindowDimensions();
   const iconColor = colorScheme === "dark" ? "#f5f5f4" : "#111827";
   const insets = useSafeAreaInsets();
   const path = usePathname();
@@ -34,6 +35,9 @@ export function Topbar() {
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [reportGroups, setReportGroups] = useState([]);
+  const [expandedReportYears, setExpandedReportYears] = useState([]);
+  const [isLoadingReport, setIsLoadingReport] = useState(false);
+  const reportContentOpacity = useRef(new Animated.Value(0)).current;
   const nextLayoutLabel = layoutMode === GRID_LAYOUT_MODE ? t("topbar.list") : t("topbar.grid");
 
   let actionIcon = null;
@@ -59,6 +63,24 @@ export function Topbar() {
     updateConfig({ field: "layoutMode", value: layoutMode });
   }, [layoutMode]);
 
+  useEffect(() => {
+    if (isLoadingReport) {
+      reportContentOpacity.setValue(0);
+      return;
+    }
+
+    if (!isReportModalVisible) {
+      reportContentOpacity.setValue(0);
+      return;
+    }
+
+    Animated.timing(reportContentOpacity, {
+      toValue: 1,
+      duration: 180,
+      useNativeDriver: true,
+    }).start();
+  }, [isLoadingReport, isReportModalVisible, reportContentOpacity]);
+
   const handleToggleTheme = () => {
     setColorScheme(colorScheme === "dark" ? "light" : "dark");
     setIsMenuOpen(false);
@@ -81,12 +103,30 @@ export function Topbar() {
   };
 
   const handleShowReport = () => {
-    const counters = [...getCounters(), ...getArchivedCounters()];
-    const registry = getCountersValues();
-    setReportGroups(buildYearEndGroupedReport(counters, registry));
+    setIsLoadingReport(true);
+    setReportGroups([]);
+    setExpandedReportYears([]);
     setIsReportModalVisible(true);
-
     setIsMenuOpen(false);
+
+    requestAnimationFrame(() => {
+      InteractionManager.runAfterInteractions(() => {
+        const counters = [...getCounters(), ...getArchivedCounters()];
+        const registry = getCountersValues();
+        setReportGroups(buildYearEndGroupedReport(counters, registry));
+        setIsLoadingReport(false);
+      });
+    });
+  };
+
+  const closeReportModal = () => {
+    setIsReportModalVisible(false);
+    setExpandedReportYears([]);
+    setIsLoadingReport(false);
+  };
+
+  const handleToggleReportYear = (year) => {
+    setExpandedReportYears((current) => toggleExpandedReportYear(current, year));
   };
 
   const handleCopyReport = async () => {
@@ -232,18 +272,22 @@ export function Topbar() {
       <Modal
         visible={isReportModalVisible}
         transparent
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => {
-          setIsReportModalVisible(false);
+          closeReportModal();
         }}
       >
-        <Pressable
-          onPress={() => {
-            setIsReportModalVisible(false);
-          }}
-          className="items-center justify-center flex-1 px-6 bg-black/35"
-        >
-          <Pressable onPress={() => { }} className="w-full max-w-md p-4 border rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
+        <View className="flex-1 items-center justify-center px-6">
+          <Pressable
+            onPress={closeReportModal}
+            style={styles.reportBackdrop}
+            accessibilityRole="button"
+            accessibilityLabel={t("form.close")}
+          />
+          <View
+            className="w-full max-w-md p-4 border rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
+            style={{ maxHeight: Math.min(windowHeight * 0.84, 720) }}
+          >
             <Text className="text-xl font-black text-center text-stone-900 dark:text-stone-100">
               {t("report.title")}
             </Text>
@@ -251,58 +295,118 @@ export function Topbar() {
               {t("report.subtitle")}
             </Text>
 
-            <View style={{ gap: 8 }}>
-              {reportGroups.length > 0 ? reportGroups.map((group) => (
-                <View
-                  key={group.year}
-                  className="px-4 py-3 border rounded-2xl border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-                >
-                  <View className="flex-row items-center justify-between">
-                    <Text className="text-sm font-black text-stone-900 dark:text-stone-100">
-                      {group.year}
-                    </Text>
-                    <Pressable
-                      onPress={() => {
-                        void handleCopyReportYear(group);
-                      }}
-                      className="items-center justify-center w-8 h-8 border rounded-lg border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
-                      accessibilityRole="button"
-                      accessibilityLabel={t("report.copyYear", { year: group.year })}
-                    >
-                      <MaterialCommunityIcons name="content-copy" size={15} color={iconColor} />
-                    </Pressable>
-                  </View>
-
-                  <View className="mt-1" style={{ gap: 4 }}>
-                    {group.items.map((item) => (
-                      <View
-                        key={`${group.year}-${item.counterId}`}
-                        className="flex-row items-center justify-between px-3 py-2 border rounded-xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
-                      >
-                        <Text numberOfLines={1} className="flex-1 pr-2 text-sm font-semibold text-stone-700 dark:text-stone-200">
-                          {item.counterTitle}
-                        </Text>
-                        <Text className="text-sm font-black text-stone-900 dark:text-stone-100">
-                          {t("report.itemValue", { value: item.value })}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              )) : (
-                <View className="px-4 py-8 border rounded-2xl border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800">
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled
+              bounces={false}
+              keyboardShouldPersistTaps="handled"
+              style={{ maxHeight: Math.min(windowHeight * 0.5, 420) }}
+              contentContainerStyle={{ paddingBottom: 4, gap: 8 }}
+            >
+              {isLoadingReport ? (
+                <View style={{ gap: 8 }}>
                   <Text className="text-sm font-semibold text-center text-stone-600 dark:text-stone-300">
-                    {t("report.empty")}
+                    {t("report.loading")}
                   </Text>
+                  <View
+                    className="px-4 py-3 border rounded-2xl border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+                  >
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-1 pr-2" style={{ gap: 8 }}>
+                        <View style={styles.reportSkeletonHeading} />
+                        <View style={styles.reportSkeletonMeta} />
+                      </View>
+                      <View className="flex-row items-center" style={{ gap: 10 }}>
+                        <View style={styles.reportSkeletonChevron} />
+                        <View style={styles.reportSkeletonIcon} />
+                      </View>
+                    </View>
+                  </View>
                 </View>
+              ) : reportGroups.length > 0 ? (
+                <Animated.View style={{ opacity: reportContentOpacity, gap: 8 }}>
+                  {reportGroups.map((group) => {
+                    const isExpanded = expandedReportYears.includes(group.year);
+
+                    return (
+                      <View
+                        key={group.year}
+                        className="px-4 py-3 border rounded-2xl border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+                      >
+                        <View className="flex-row items-center justify-between" style={{ gap: 10 }}>
+                          <Pressable
+                            onPress={() => {
+                              handleToggleReportYear(group.year);
+                            }}
+                            className="flex-1 flex-row items-center justify-between"
+                            accessibilityRole="button"
+                            accessibilityLabel={isExpanded ? t("report.collapseYear", { year: group.year }) : t("report.expandYear", { year: group.year })}
+                          >
+                            <View className="flex-1 pr-2">
+                              <Text className="text-sm font-black text-stone-900 dark:text-stone-100">
+                                {group.year}
+                              </Text>
+                              <Text className="mt-0.5 text-xs font-semibold text-stone-500 dark:text-stone-400">
+                                {t("report.itemCount", { count: group.items.length })}
+                              </Text>
+                            </View>
+                            <MaterialCommunityIcons
+                              name={isExpanded ? "chevron-up" : "chevron-down"}
+                              size={20}
+                              color={iconColor}
+                            />
+                          </Pressable>
+
+                          <Pressable
+                            onPress={() => {
+                              void handleCopyReportYear(group);
+                            }}
+                            className="items-center justify-center w-8 h-8 border rounded-lg border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
+                            accessibilityRole="button"
+                            accessibilityLabel={t("report.copyYear", { year: group.year })}
+                          >
+                            <MaterialCommunityIcons name="content-copy" size={15} color={iconColor} />
+                          </Pressable>
+                        </View>
+
+                        {isExpanded ? (
+                          <View className="mt-3" style={{ gap: 4 }}>
+                            {group.items.map((item) => (
+                              <View
+                                key={`${group.year}-${item.counterId}`}
+                                className="flex-row items-center justify-between px-3 py-2 border rounded-xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
+                              >
+                                <Text numberOfLines={1} className="flex-1 pr-2 text-sm font-semibold text-stone-700 dark:text-stone-200">
+                                  {item.counterTitle}
+                                </Text>
+                                <Text className="text-sm font-black text-stone-900 dark:text-stone-100">
+                                  {t("report.itemValue", { value: item.value })}
+                                </Text>
+                              </View>
+                            ))}
+                          </View>
+                        ) : null}
+                      </View>
+                    );
+                  })}
+                </Animated.View>
+              ) : (
+                <Animated.View style={{ opacity: reportContentOpacity }}>
+                  <View className="px-4 py-8 border rounded-2xl border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800">
+                    <Text className="text-sm font-semibold text-center text-stone-600 dark:text-stone-300">
+                      {t("report.empty")}
+                    </Text>
+                  </View>
+                </Animated.View>
               )}
-            </View>
+            </ScrollView>
 
             <View className="flex-row justify-center mt-4" style={{ gap: 10 }}>
               <Pressable
                 onPress={() => {
                   void handleCopyReport();
                 }}
+                disabled={isLoadingReport || reportGroups.length === 0}
                 className="flex-1 px-4 py-3 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
                 accessibilityRole="button"
                 accessibilityLabel={t("report.copyAll")}
@@ -316,6 +420,7 @@ export function Topbar() {
                 onPress={() => {
                   void handleSaveReportPdf();
                 }}
+                disabled={isLoadingReport || reportGroups.length === 0}
                 className="flex-1 px-4 py-3 rounded-full bg-stone-900 dark:bg-stone-100"
                 accessibilityRole="button"
                 accessibilityLabel={t("report.savePdf")}
@@ -325,8 +430,8 @@ export function Topbar() {
                 </Text>
               </Pressable>
             </View>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
 
       <Modal
@@ -401,6 +506,37 @@ export function Topbar() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  reportBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
+  },
+  reportSkeletonHeading: {
+    width: 88,
+    height: 14,
+    borderRadius: 999,
+    backgroundColor: "rgba(120, 113, 108, 0.28)",
+  },
+  reportSkeletonIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "rgba(120, 113, 108, 0.18)",
+  },
+  reportSkeletonMeta: {
+    width: 72,
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: "rgba(120, 113, 108, 0.16)",
+  },
+  reportSkeletonChevron: {
+    width: 18,
+    height: 18,
+    borderRadius: 999,
+    backgroundColor: "rgba(120, 113, 108, 0.14)",
+  },
+});
 
 function buildReportHtml(reportGroups, t, colorScheme) {
   const bodyRows = reportGroups.length > 0

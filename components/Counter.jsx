@@ -28,10 +28,10 @@ function getSafeCardPalette(backgroundColor) {
 
 /**
  * Interactive counter card with increment/decrement actions.
- * @param {{counter: {id: number, title: string, value: number | string, color: string, backgroundColor: string}, playSound?: () => Promise<void>}} props
+ * @param {{counter: {id: number, title: string, value: number | string, color: string, backgroundColor: string}}} props
  * @returns {JSX.Element}
  */
-export function Counter({ counter, playSound }) {
+export function Counter({ counter }) {
   const { t } = useI18n();
   const [counterValue, setCounterValue] = useState(
     Number.parseInt(counter.value, 10) || 0,
@@ -60,7 +60,6 @@ export function Counter({ counter, playSound }) {
     setCounterValue((previousValue) => {
       const nextValue = previousValue + 1;
       updateCounterValue({ id: counter.id, value: nextValue });
-      void playSound?.();
       return nextValue;
     });
   };
@@ -69,7 +68,6 @@ export function Counter({ counter, playSound }) {
     setCounterValue((previousValue) => {
       const nextValue = previousValue - 1;
       updateCounterValue({ id: counter.id, value: nextValue });
-      void playSound?.();
       return nextValue;
     });
   };

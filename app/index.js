@@ -13,10 +13,9 @@ import {
 import { useCounter } from "../lib/counterContext";
 import { useI18n } from "../lib/i18n";
 import { GRID_LAYOUT_MODE } from "../lib/layoutMode";
-import { createAudioPlayer, setIsAudioActiveAsync } from "expo-audio";
 
 /**
- * Main screen listing all counters and handling tap audio lifecycle.
+ * Main screen listing all counters.
  * @returns {JSX.Element}
  */
 export default function Index() {
@@ -26,7 +25,6 @@ export default function Index() {
   const [dragCompensation, setDragCompensation] = useState({ x: 0, y: 0 });
   const [listWidth, setListWidth] = useState(0);
   const { setCounterId, layoutMode } = useCounter();
-  const soundRef = useRef(null);
   const countersRef = useRef([]);
   const dragStartCountersRef = useRef([]);
   const dragStartOrderRef = useRef([]);
@@ -37,41 +35,6 @@ export default function Index() {
   useEffect(() => {
     countersRef.current = counters;
   }, [counters]);
-
-  useEffect(() => {
-    const loadSound = async () => {
-      try {
-        await setIsAudioActiveAsync(true);
-        const player = createAudioPlayer(require("../assets/tap.mp3"));
-        player.volume = 0.3;
-        soundRef.current = player;
-      } catch (error) {
-        console.error("Failed to load tap sound:", error);
-      }
-    };
-
-    void loadSound();
-
-    return () => {
-      if (soundRef.current) {
-        soundRef.current.remove();
-        soundRef.current = null;
-      }
-    };
-  }, []);
-
-  const playSound = async () => {
-    if (!soundRef.current) {
-      return;
-    }
-
-    try {
-      soundRef.current.seekTo(0);
-      soundRef.current.play();
-    } catch (error) {
-      console.error("Failed to replay tap sound:", error);
-    }
-  };
 
   useFocusEffect(
     useCallback(() => {
@@ -212,7 +175,6 @@ export default function Index() {
                 >
                   <DraggableCounter
                     counter={counter}
-                    playSound={playSound}
                     isDragging={draggingId === counter.id}
                     shouldAnimateLayout={draggingId !== null && draggingId !== counter.id}
                     dragCompensation={draggingId === counter.id ? dragCompensation : { x: 0, y: 0 }}

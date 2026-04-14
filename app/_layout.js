@@ -8,7 +8,7 @@ import { I18nProvider } from "../lib/i18n";
 import { ToastProvider } from "../lib/toastProvider";
 import { normalizeLayoutMode } from "../lib/layoutMode";
 import { useColorScheme } from "nativewind";
-import { createTables, ensureDevelopmentPreviewCounter, getConfig } from "../lib/db/database";
+import { createTables, getConfig, syncDevelopmentPreviewData } from "../lib/db/database";
 
 LogBox.ignoreLogs([
   "setLayoutAnimationEnabledExperimental is currently a no-op in the New Architecture.",
@@ -37,7 +37,7 @@ export default function Layout() {
       return;
     }
 
-    ensureDevelopmentPreviewCounter();
+    syncDevelopmentPreviewData();
 
     const loadTheme = () => {
       const storedTheme = getConfig("theme") ?? "light";

@@ -39,6 +39,7 @@
 6. Counter display order is persisted when user reorders via drag and drop.
 7. Display order is 0-indexed and counters are sorted by displayOrder on retrieval.
 8. Layout mode is persisted in configuration and restored on startup.
+9. Development preview counters are seeded only in development builds and are purged in production builds.
 
 ## UI state behavior
 
@@ -50,6 +51,9 @@
 6. Grid mode renders counters in two columns on the home screen.
 7. Detail screen supports empty history state without crash.
 8. Form supports create and edit flows with the same component.
+9. Annual report opens in a modal with immediate loading feedback.
+10. Annual report content scrolls inside the modal without overflowing the screen.
+11. Annual report year sections are collapsed by default and expand on tap.
 
 ## Quality gates
 
@@ -68,9 +72,12 @@
 - Tests: npm run test
 - Expo health checks: npx expo-doctor
 - Preview build: eas build -p android --profile preview
+- Production Android build: npx eas-cli@latest build --platform android --profile production --non-interactive --message "Release 1.1.0"
+- Production Android build and submit: npx eas-cli@latest build --platform android --profile production --auto-submit --non-interactive --message "Release 1.1.0"
 
 ## Maintenance baseline
 
 1. Project baseline runtime is Expo SDK 54.
 2. Dependency security baseline requires npm audit total vulnerabilities to remain at 0.
 3. Any dependency update must preserve lint, tests, and expo-doctor passing status.
+4. Release 1.1.0 uses Expo app version `1.1.0` and Android `versionCode` `8`.
