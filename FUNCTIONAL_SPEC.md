@@ -11,12 +11,23 @@
 7. Users see the interface in English or Spanish depending on device language.
 8. Users can recover archived counters from the create screen.
 9. Users can open an annual report with year-end maximum values, copy it, and export it as PDF.
+10. Users can reorder counters by long-pressing a counter and dragging it directly to a new position.
+11. Users can switch the home view between a list and a two-column grid from the topbar menu.
 
 ## Validation and input rules
 
 1. Name is normalized and cannot be empty after trim.
 2. Value must be a valid integer.
 3. Invalid input shows explicit feedback and blocks persistence.
+
+## Error handling and feedback
+
+1. Validation errors show animated success/error/info toast notifications.
+2. Toast notifications appear at the top of the screen with auto-dismiss after 3 seconds.
+3. Error toasts include title and descriptive message (red color).
+4. Success toasts include title and confirmation message (green color).
+5. Info toasts provide informational feedback (blue color).
+6. Toasts can be manually dismissed by tapping the close button.
 
 ## Persistence behavior
 
@@ -25,12 +36,20 @@
 3. Counter update and optional history update are atomic.
 4. Increment/decrement update and history write are atomic.
 5. Archiving a counter marks it as archived and keeps historical values for future recovery.
+6. Counter display order is persisted when user reorders via drag and drop.
+7. Display order is 0-indexed and counters are sorted by displayOrder on retrieval.
+8. Layout mode is persisted in configuration and restored on startup.
 
 ## UI state behavior
 
-1. Home screen shows all counters and supports direct value changes.
-2. Detail screen supports empty history state without crash.
-3. Form supports create and edit flows with the same component.
+1. Home screen shows all counters sorted by display order and supports direct value changes.
+2. Long-pressing a counter activates drag mode without opening any modal or popup.
+3. Dropping a dragged counter persists the new order immediately.
+4. Success toast confirms order was saved; error toast if persistence fails.
+5. Topbar menu includes a layout toggle between list and two-column grid.
+6. Grid mode renders counters in two columns on the home screen.
+7. Detail screen supports empty history state without crash.
+8. Form supports create and edit flows with the same component.
 
 ## Quality gates
 

@@ -12,6 +12,7 @@ import {
   deleteCounter,
 } from "../../lib/db/database";
 import { useI18n } from "../../lib/i18n";
+import { useToast } from "../../lib/toastProvider";
 import { buildValidatedCounterPayload } from "../../lib/counterValidation";
 
 import { LineText } from "./LineText";
@@ -45,6 +46,7 @@ function getDefaultCounterColors(scheme) {
 export function Form({ id, initialOpenArchived = false }) {
   const router = useRouter();
   const { t } = useI18n();
+  const toast = useToast();
   const { colorScheme } = useColorScheme();
   const defaultColors = getDefaultCounterColors(colorScheme);
 
@@ -67,7 +69,7 @@ export function Form({ id, initialOpenArchived = false }) {
     });
 
     if (!validationResult.isValid) {
-      Alert.alert(t("alert.validationError"), validationResult.error);
+      toast.error(t("alert.validationError"), validationResult.error);
       return null;
     }
 
@@ -108,7 +110,7 @@ export function Form({ id, initialOpenArchived = false }) {
 
     const insertedCounterId = insertCounter(payload);
     if (!insertedCounterId) {
-      Alert.alert(t("alert.saveError"), t("alert.createFailed"));
+      toast.error(t("alert.saveError"), t("alert.createFailed"));
       return;
     }
 
@@ -123,7 +125,7 @@ export function Form({ id, initialOpenArchived = false }) {
 
     const currentCounter = getCounters(id);
     if (!currentCounter) {
-      Alert.alert(t("alert.updateError"), t("alert.updateNotFound"));
+      toast.error(t("alert.updateError"), t("alert.updateNotFound"));
       return;
     }
 
@@ -138,7 +140,7 @@ export function Form({ id, initialOpenArchived = false }) {
     });
 
     if (!updated) {
-      Alert.alert(t("alert.updateError"), t("alert.updateFailed"));
+      toast.error(t("alert.updateError"), t("alert.updateFailed"));
       return;
     }
 
@@ -160,7 +162,7 @@ export function Form({ id, initialOpenArchived = false }) {
           onPress: () => {
             const deleted = deleteCounter({ id });
             if (!deleted) {
-              Alert.alert(t("alert.deleteError"), t("alert.deleteFailed"));
+              toast.error(t("alert.deleteError"), t("alert.deleteFailed"));
               return;
             }
 
@@ -182,7 +184,7 @@ export function Form({ id, initialOpenArchived = false }) {
     const restored = restoreCounter({ id: counterId });
 
     if (!restored) {
-      Alert.alert(t("alert.restoreError"), t("alert.restoreFailed"));
+      toast.error(t("alert.restoreError"), t("alert.restoreFailed"));
       return;
     }
 

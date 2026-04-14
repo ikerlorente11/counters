@@ -1,9 +1,12 @@
 import { LogBox, UIManager, View } from "react-native";
 import { useState, useEffect } from "react";
 import { Stack } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Topbar } from "../components/Topbar";
 import { CounterProvider } from "../lib/counterContext";
 import { I18nProvider } from "../lib/i18n";
+import { ToastProvider } from "../lib/toastProvider";
+import { normalizeLayoutMode } from "../lib/layoutMode";
 import { useColorScheme } from "nativewind";
 import { createTables, ensureDevelopmentPreviewCounter, getConfig } from "../lib/db/database";
 
@@ -24,6 +27,7 @@ export default function Layout() {
   const { setColorScheme } = useColorScheme();
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);
   const [initialLanguage, setInitialLanguage] = useState("en");
+  const [initialLayoutMode, setInitialLayoutMode] = useState("list");
 
   useEffect(() => {
     const tablesCreated = createTables();
@@ -38,8 +42,10 @@ export default function Layout() {
     const loadTheme = () => {
       const storedTheme = getConfig("theme") ?? "light";
       const storedLanguage = getConfig("language") ?? "en";
+      const storedLayoutMode = normalizeLayoutMode(getConfig("layoutMode"));
       setColorScheme(storedTheme);
       setInitialLanguage(storedLanguage);
+      setInitialLayoutMode(storedLayoutMode);
       setIsThemeLoaded(true);
     };
 
@@ -49,17 +55,21 @@ export default function Layout() {
   if (!isThemeLoaded) {return null;}
   
   return (
-    <I18nProvider initialLanguage={initialLanguage}>
-      <CounterProvider>
-        <View className="flex-1 bg-stone-100 dark:bg-stone-950">
-          <Stack
-            screenOptions={{
-              header: () => <Topbar />,
-              contentStyle: { backgroundColor: "transparent" },
-            }}
-          />
-        </View>
-      </CounterProvider>
-    </I18nProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ToastProvider>
+        <I18nProvider initialLanguage={initialLanguage}>
+          <CounterProvider initialLayoutMode={initialLayoutMode}>
+            <View className="flex-1 bg-stone-100 dark:bg-stone-950">
+              <Stack
+                screenOptions={{
+                  header: () => <Topbar />,
+                  contentStyle: { backgroundColor: "transparent" },
+                }}
+              />
+            </View>
+          </CounterProvider>
+        </I18nProvider>
+      </ToastProvider>
+    </GestureHandlerRootView>
   );
 }

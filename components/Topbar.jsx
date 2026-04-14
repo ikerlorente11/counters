@@ -1,4 +1,4 @@
-import { View, Text, Pressable, Alert, Modal } from "react-native";
+import { View, Text, Pressable, Modal } from "react-native";
 import { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link, usePathname } from "expo-router";
@@ -9,6 +9,8 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Add, Edit } from './Icons';
 import { useCounter } from "../lib/counterContext";
 import { SUPPORTED_LANGUAGES, useI18n } from "../lib/i18n";
+import { useToast } from "../lib/toastProvider";
+import { DEFAULT_LAYOUT_MODE, GRID_LAYOUT_MODE } from "../lib/layoutMode";
 import { getArchivedCounters, getCounters, getCountersValues, updateConfig } from "../lib/db/database";
 import { buildYearEndGroupedReport, buildYearEndReportText, buildYearSectionText } from "../lib/reporting";
 import { useColorScheme } from "nativewind";
@@ -19,18 +21,20 @@ import { useColorScheme } from "nativewind";
  */
 export function Topbar() {
   const { t, language, setLanguage } = useI18n();
+  const toast = useToast();
   const { colorScheme, setColorScheme } = useColorScheme();
   const iconColor = colorScheme === "dark" ? "#f5f5f4" : "#111827";
   const insets = useSafeAreaInsets();
   const path = usePathname();
   const regex = /^\/counter\/\d+$/;
-  const { counterId } = useCounter();
+  const { counterId, layoutMode, setLayoutMode } = useCounter();
   const isHomePath = path === "/";
   const isCounterDetailPath = regex.test(path);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [reportGroups, setReportGroups] = useState([]);
+  const nextLayoutLabel = layoutMode === GRID_LAYOUT_MODE ? t("topbar.list") : t("topbar.grid");
 
   let actionIcon = null;
   let actionLabel = t("topbar.openAction");
@@ -51,6 +55,10 @@ export function Topbar() {
     updateConfig({ field: "language", value: language });
   }, [language]);
 
+  useEffect(() => {
+    updateConfig({ field: "layoutMode", value: layoutMode });
+  }, [layoutMode]);
+
   const handleToggleTheme = () => {
     setColorScheme(colorScheme === "dark" ? "light" : "dark");
     setIsMenuOpen(false);
@@ -58,6 +66,12 @@ export function Topbar() {
 
   const handleChangeLanguage = () => {
     setIsLanguageModalVisible(true);
+    setIsMenuOpen(false);
+  };
+
+  const handleToggleLayout = () => {
+    const nextLayoutMode = layoutMode === GRID_LAYOUT_MODE ? DEFAULT_LAYOUT_MODE : GRID_LAYOUT_MODE;
+    setLayoutMode(nextLayoutMode);
     setIsMenuOpen(false);
   };
 
@@ -78,13 +92,13 @@ export function Topbar() {
   const handleCopyReport = async () => {
     const reportText = buildYearEndReportText(reportGroups, t);
     await Clipboard.setStringAsync(reportText);
-    Alert.alert(t("report.copySuccessTitle"), t("report.copySuccessBody"));
+    toast.success(t("report.copySuccessTitle"), t("report.copySuccessBody"));
   };
 
   const handleCopyReportYear = async (yearGroup) => {
     const reportText = buildYearSectionText(yearGroup, t);
     await Clipboard.setStringAsync(reportText);
-    Alert.alert(t("report.copySuccessTitle"), t("report.copyYearSuccessBody", { year: yearGroup.year }));
+    toast.success(t("report.copySuccessTitle"), t("report.copyYearSuccessBody", { year: yearGroup.year }));
   };
 
   const handleSaveReportPdf = async () => {
@@ -99,7 +113,7 @@ export function Topbar() {
       return;
     }
 
-    Alert.alert(t("report.pdfReadyTitle"), uri);
+    toast.info(t("report.pdfReadyTitle"), uri);
   };
 
   return (
@@ -185,6 +199,20 @@ export function Topbar() {
               >
                 <MaterialCommunityIcons name="translate" size={18} color={iconColor} />
                 <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.language")}</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleToggleLayout}
+                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+                accessibilityRole="button"
+                accessibilityLabel={nextLayoutLabel}
+              >
+                <MaterialCommunityIcons
+                  name={layoutMode === GRID_LAYOUT_MODE ? "view-agenda-outline" : "view-grid-outline"}
+                  size={18}
+                  color={iconColor}
+                />
+                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{nextLayoutLabel}</Text>
               </Pressable>
 
               <Pressable
