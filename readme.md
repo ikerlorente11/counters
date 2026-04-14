@@ -44,6 +44,8 @@ This project intentionally keeps exactly three top-level documentation files:
 - Play Store submission:
 	- Build and auto-submit: `npx eas-cli@latest build --platform android --profile production --auto-submit --non-interactive --message "Release 1.1.0 - Reports, archive recovery, layout toggle, reorder and Play Store polish"`
 	- Manual submit if needed: `npx eas-cli@latest submit --platform android --profile production`
+- Deobfuscation support:
+	- Production builds keep `android/app/build/outputs/mapping/release/mapping.txt` as an EAS build artifact for Play Console crash/ANR deobfuscation uploads.
 - Current EAS submit profile targets the Play internal track first.
 
 ## Release notes 1.1.0
