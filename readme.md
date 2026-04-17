@@ -30,6 +30,9 @@ This project intentionally keeps exactly three top-level documentation files:
 
 - Preview build: `eas build -p android --profile preview`
 - Production Android bundle: `npx eas-cli@latest build --platform android --profile production --non-interactive --message "Release 1.1.0 - Reports, archive recovery, layout toggle, reorder and Play Store polish"`
+- Local: `npx expo prebuild --platform android --clean`
+`npx expo run:android`
+
 
 ## Release readiness
 
