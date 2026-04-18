@@ -1,7 +1,8 @@
 import { LogBox, UIManager, View } from "react-native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import * as SplashScreen from "expo-splash-screen";
 import { Topbar } from "../components/Topbar";
 import { CounterProvider } from "../lib/counterContext";
 import { I18nProvider } from "../lib/i18n";
@@ -9,6 +10,9 @@ import { ToastProvider } from "../lib/toastProvider";
 import { normalizeLayoutMode } from "../lib/layoutMode";
 import { useColorScheme } from "nativewind";
 import { createTables, getConfig, syncDevelopmentPreviewData } from "../lib/db/database";
+import { cancelCounterReminder, scheduleCounterReminder } from "../lib/notifications";
+
+SplashScreen.preventAutoHideAsync();
 
 LogBox.ignoreLogs([
   "setLayoutAnimationEnabledExperimental is currently a no-op in the New Architecture.",
@@ -19,13 +23,9 @@ if (typeof UIManager.setLayoutAnimationEnabledExperimental === "function") {
   UIManager.setLayoutAnimationEnabledExperimental = () => {};
 }
 
-/**
- * Root layout that initializes app state and top-level navigation shell.
- * @returns {JSX.Element | null}
- */
 export default function Layout() {
   const { setColorScheme } = useColorScheme();
-  const [isThemeLoaded, setIsThemeLoaded] = useState(false);
+  const [isReady, setIsReady] = useState(false);
   const [initialLanguage, setInitialLanguage] = useState("en");
   const [initialLayoutMode, setInitialLayoutMode] = useState("list");
 
@@ -33,29 +33,46 @@ export default function Layout() {
     const tablesCreated = createTables();
     if (!tablesCreated) {
       setColorScheme("light");
-      setIsThemeLoaded(true);
+      setIsReady(true);
       return;
     }
 
-    syncDevelopmentPreviewData();
+    const storedTheme = getConfig("theme") ?? "light";
+    const storedLanguage = getConfig("language") ?? "en";
+    const storedLayoutMode = normalizeLayoutMode(getConfig("layoutMode"));
+    setColorScheme(storedTheme);
+    setInitialLanguage(storedLanguage);
+    setInitialLayoutMode(storedLayoutMode);
+    setIsReady(true);
 
-    const loadTheme = () => {
-      const storedTheme = getConfig("theme") ?? "light";
-      const storedLanguage = getConfig("language") ?? "en";
-      const storedLayoutMode = normalizeLayoutMode(getConfig("layoutMode"));
-      setColorScheme(storedTheme);
-      setInitialLanguage(storedLanguage);
-      setInitialLayoutMode(storedLayoutMode);
-      setIsThemeLoaded(true);
-    };
-
-    loadTheme();
+    // Deferred: dev data cleanup and notification setup don't block the UI
+    setTimeout(() => {
+      syncDevelopmentPreviewData();
+      const notificationsEnabled = getConfig("notificationsEnabled") === "true";
+      if (notificationsEnabled) {
+        const hour = Number.parseInt(getConfig("notificationHour") ?? "9", 10);
+        const minute = Number.parseInt(getConfig("notificationMinute") ?? "0", 10);
+        scheduleCounterReminder({
+          hour: Number.isNaN(hour) ? 9 : hour,
+          minute: Number.isNaN(minute) ? 0 : minute,
+          language: storedLanguage,
+        }).catch(() => {});
+      } else {
+        cancelCounterReminder().catch(() => {});
+      }
+    }, 0);
   }, []);
 
-  if (!isThemeLoaded) {return null;}
-  
+  const onRootLayout = useCallback(() => {
+    if (isReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [isReady]);
+
+  if (!isReady) return null;
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }} onLayout={onRootLayout}>
       <ToastProvider>
         <I18nProvider initialLanguage={initialLanguage}>
           <CounterProvider initialLayoutMode={initialLayoutMode}>

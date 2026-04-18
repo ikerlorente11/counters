@@ -11,8 +11,9 @@ import { useCounter } from "../lib/counterContext";
 import { SUPPORTED_LANGUAGES, useI18n } from "../lib/i18n";
 import { useToast } from "../lib/toastProvider";
 import { DEFAULT_LAYOUT_MODE, GRID_LAYOUT_MODE } from "../lib/layoutMode";
-import { getArchivedCounters, getCounters, getCountersValues, updateConfig } from "../lib/db/database";
+import { getArchivedCounters, getConfig, getCounters, getCountersValues, updateConfig } from "../lib/db/database";
 import { buildYearEndGroupedReport, buildYearEndReportText, buildYearSectionText, toggleExpandedReportYear } from "../lib/reporting";
+import { cancelCounterReminder, requestNotificationPermission, scheduleCounterReminder } from "../lib/notifications";
 import { useColorScheme } from "nativewind";
 
 /**
@@ -33,6 +34,10 @@ export function Topbar() {
   const isCounterDetailPath = regex.test(path);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
+  const [isNotificationsModalVisible, setIsNotificationsModalVisible] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationHour, setNotificationHour] = useState(9);
+  const [notificationMinute, setNotificationMinute] = useState(0);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [reportGroups, setReportGroups] = useState([]);
   const [expandedReportYears, setExpandedReportYears] = useState([]);
@@ -64,6 +69,15 @@ export function Topbar() {
   }, [layoutMode]);
 
   useEffect(() => {
+    const enabled = getConfig("notificationsEnabled") === "true";
+    const hour = Number.parseInt(getConfig("notificationHour") ?? "9", 10);
+    const minute = Number.parseInt(getConfig("notificationMinute") ?? "0", 10);
+    setNotificationsEnabled(enabled);
+    setNotificationHour(Number.isNaN(hour) ? 9 : hour);
+    setNotificationMinute(Number.isNaN(minute) ? 0 : minute);
+  }, []);
+
+  useEffect(() => {
     if (isLoadingReport) {
       reportContentOpacity.setValue(0);
       return;
@@ -80,6 +94,32 @@ export function Topbar() {
       useNativeDriver: true,
     }).start();
   }, [isLoadingReport, isReportModalVisible, reportContentOpacity]);
+
+  const handleOpenNotifications = () => {
+    setIsNotificationsModalVisible(true);
+    setIsMenuOpen(false);
+  };
+
+  const handleSaveNotifications = async () => {
+    updateConfig({ field: "notificationsEnabled", value: String(notificationsEnabled) });
+    updateConfig({ field: "notificationHour", value: String(notificationHour) });
+    updateConfig({ field: "notificationMinute", value: String(notificationMinute) });
+
+    if (notificationsEnabled) {
+      const granted = await requestNotificationPermission();
+      if (granted) {
+        await scheduleCounterReminder({ hour: notificationHour, minute: notificationMinute, language });
+      } else {
+        setNotificationsEnabled(false);
+        updateConfig({ field: "notificationsEnabled", value: "false" });
+        toast.error(t("notifications.permissionDenied"), t("notifications.permissionDeniedBody"));
+      }
+    } else {
+      await cancelCounterReminder();
+    }
+
+    setIsNotificationsModalVisible(false);
+  };
 
   const handleToggleTheme = () => {
     setColorScheme(colorScheme === "dark" ? "light" : "dark");
@@ -264,6 +304,16 @@ export function Topbar() {
                 <MaterialCommunityIcons name="theme-light-dark" size={18} color={iconColor} />
                 <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.theme")}</Text>
               </Pressable>
+
+              <Pressable
+                onPress={handleOpenNotifications}
+                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+                accessibilityRole="button"
+                accessibilityLabel={t("notifications.menuLabel")}
+              >
+                <MaterialCommunityIcons name={notificationsEnabled ? "bell" : "bell-outline"} size={18} color={iconColor} />
+                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("notifications.menuLabel")}</Text>
+              </Pressable>
             </Pressable>
           </View>
         </Pressable>
@@ -435,6 +485,129 @@ export function Topbar() {
       </Modal>
 
       <Modal
+        visible={isNotificationsModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setIsNotificationsModalVisible(false);
+        }}
+      >
+        <Pressable
+          onPress={() => {
+            setIsNotificationsModalVisible(false);
+          }}
+          className="items-center justify-center flex-1 px-6 bg-black/35"
+        >
+          <Pressable onPress={() => { }} className="w-full max-w-xs p-4 border rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
+            <Text className="text-xl font-black text-center text-stone-900 dark:text-stone-100">
+              {t("notifications.modalTitle")}
+            </Text>
+            <Text className="mt-1 mb-4 text-sm text-center text-stone-600 dark:text-stone-300">
+              {t("notifications.modalBody")}
+            </Text>
+
+            <Pressable
+              onPress={() => setNotificationsEnabled((v) => !v)}
+              className="flex-row items-center justify-between px-4 py-3 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+              accessibilityRole="switch"
+              accessibilityLabel={t("notifications.enable")}
+            >
+              <Text className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                {t("notifications.enable")}
+              </Text>
+              <View
+                style={[
+                  styles.toggleTrack,
+                  { backgroundColor: notificationsEnabled ? (colorScheme === "dark" ? "#f5f5f4" : "#1c1917") : "rgba(120,113,108,0.3)" },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.toggleThumb,
+                    {
+                      alignSelf: notificationsEnabled ? "flex-end" : "flex-start",
+                      backgroundColor: notificationsEnabled ? (colorScheme === "dark" ? "#1c1917" : "#f8fafc") : "#f8fafc",
+                    },
+                  ]}
+                />
+              </View>
+            </Pressable>
+
+            {notificationsEnabled ? (
+              <View className="mt-3 px-4 py-3 rounded-2xl border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800">
+                <Text className="text-xs font-bold text-center text-stone-500 dark:text-stone-400" style={{ marginBottom: 12 }}>
+                  {t("notifications.time")}
+                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  <View style={{ alignItems: "center", gap: 8 }}>
+                    <Pressable
+                      onPress={() => setNotificationHour((h) => (h + 1) % 24)}
+                      accessibilityRole="button"
+                    >
+                      <MaterialCommunityIcons name="chevron-up" size={28} color={iconColor} />
+                    </Pressable>
+                    <Text className="text-2xl font-black text-stone-900 dark:text-stone-100" style={{ minWidth: 48, textAlign: "center" }}>
+                      {String(notificationHour).padStart(2, "0")}
+                    </Text>
+                    <Pressable
+                      onPress={() => setNotificationHour((h) => (h - 1 + 24) % 24)}
+                      accessibilityRole="button"
+                    >
+                      <MaterialCommunityIcons name="chevron-down" size={28} color={iconColor} />
+                    </Pressable>
+                  </View>
+                  <Text className="text-2xl font-black text-stone-900 dark:text-stone-100">:</Text>
+                  <View style={{ alignItems: "center", gap: 8 }}>
+                    <Pressable
+                      onPress={() => setNotificationMinute((m) => (m + 1) % 60)}
+                      accessibilityRole="button"
+                    >
+                      <MaterialCommunityIcons name="chevron-up" size={28} color={iconColor} />
+                    </Pressable>
+                    <Text className="text-2xl font-black text-stone-900 dark:text-stone-100" style={{ minWidth: 48, textAlign: "center" }}>
+                      {String(notificationMinute).padStart(2, "0")}
+                    </Text>
+                    <Pressable
+                      onPress={() => setNotificationMinute((m) => (m - 1 + 60) % 60)}
+                      accessibilityRole="button"
+                    >
+                      <MaterialCommunityIcons name="chevron-down" size={28} color={iconColor} />
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+            ) : null}
+
+            <Pressable
+              onPress={() => {
+                void handleSaveNotifications();
+              }}
+              className="px-4 py-3 mt-3 rounded-full bg-stone-900 dark:bg-stone-100"
+              accessibilityRole="button"
+              accessibilityLabel={t("notifications.save")}
+            >
+              <Text className="text-sm font-extrabold text-center text-stone-100 dark:text-stone-900">
+                {t("notifications.save")}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => {
+                setIsNotificationsModalVisible(false);
+              }}
+              className="px-4 py-3 mt-2 rounded-full border border-stone-300 dark:border-stone-700"
+              accessibilityRole="button"
+              accessibilityLabel={t("form.cancel")}
+            >
+              <Text className="text-sm font-extrabold text-center text-stone-900 dark:text-stone-100">
+                {t("form.cancel")}
+              </Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal
         visible={isLanguageModalVisible}
         transparent
         animationType="fade"
@@ -508,6 +681,18 @@ export function Topbar() {
 }
 
 const styles = StyleSheet.create({
+  toggleTrack: {
+    width: 44,
+    height: 26,
+    borderRadius: 13,
+    padding: 2,
+    justifyContent: "center",
+  },
+  toggleThumb: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+  },
   reportBackdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.35)",

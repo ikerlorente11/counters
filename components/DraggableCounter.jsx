@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
         lineHeight: 36,
     },
     button: {
-        width: 54,
+        width: 68,
         borderRadius: 16,
         alignItems: "center",
         height: 88,
