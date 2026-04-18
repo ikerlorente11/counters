@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
         alignItems: "stretch",
     },
     dataShell: {
-        width: "60%",
+        flex: 1,
     },
     dataGridShell: {
         width: "100%",

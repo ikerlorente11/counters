@@ -1,5 +1,5 @@
 import { View, Text, FlatList, Pressable } from "react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { Registry } from "../../components/Registry";
 import { CustomLineChart } from "../../components/charts/linechart";
@@ -15,7 +15,10 @@ import { getCountersValues } from "../../lib/db/database";
  */
 export default function CounterInfo() {
   const { t } = useI18n();
+  const [isPending, startTransition] = useTransition();
+  const [displayRange, setDisplayRange] = useState("7d");
   const [range, setRange] = useState("7d");
+  const [chartAnimated, setChartAnimated] = useState(true);
   const [chartLabelDismissSignal, setChartLabelDismissSignal] = useState(0);
   const { id: idParam } = useLocalSearchParams();
   const id = parseInt(idParam, 10);
@@ -25,11 +28,11 @@ export default function CounterInfo() {
     setCounterId(id);
   }, [id, setCounterId]);
 
-  const counterValues = getCountersValues(id);
+  const counterValues = useMemo(() => getCountersValues(id), [id]);
   const latestValue = counterValues[counterValues.length - 1]?.value ?? 0;
   const filteredCounterValues = useMemo(() => getCounterValuesForRange(counterValues, range), [counterValues, range]);
 
-  const data = filteredCounterValues.map((counter) => {
+  const data = useMemo(() => filteredCounterValues.map((counter) => {
     const [year, month, day] = extractCounterDateParts(counter.date);
 
     return {
@@ -38,7 +41,7 @@ export default function CounterInfo() {
       label: `${month}/${day}`,
       fullLabel: `${month}/${day}/${year.slice(-2)}`,
     };
-  });
+  }), [filteredCounterValues]);
 
   return (
     <View
@@ -49,13 +52,17 @@ export default function CounterInfo() {
     >
       <View className="flex-row justify-center pt-3 pb-3" style={{ gap: 8 }}>
         {COUNTER_CHART_FILTERS.map((filter) => {
-          const isActive = range === filter.key;
+          const isActive = displayRange === filter.key;
 
           return (
             <Pressable
               key={filter.key}
               onPress={() => {
-                setRange(filter.key);
+                setChartAnimated(false);
+                setDisplayRange(filter.key);
+                startTransition(() => {
+                  setRange(filter.key);
+                });
               }}
               className={`px-4 py-2 rounded-2xl border ${
                 isActive
@@ -85,7 +92,7 @@ export default function CounterInfo() {
           event.stopPropagation();
         }}
       >
-        <CustomLineChart data={data} latestValue={latestValue} resetSignal={chartLabelDismissSignal} />
+        <CustomLineChart data={data} latestValue={latestValue} resetSignal={chartLabelDismissSignal} animated={chartAnimated} isLoading={isPending} />
       </View>
 
       <View className="flex-1 min-h-0 mt-1">
