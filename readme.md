@@ -1,6 +1,6 @@
 # Counters
 
-Current release target: 1.1.0
+Current release target: 1.1.1
 
 ## Documentation
 
@@ -29,7 +29,7 @@ This project intentionally keeps exactly three top-level documentation files:
 ## Build
 
 - Preview build: `eas build -p android --profile preview`
-- Production Android bundle: `npx eas-cli@latest build --platform android --profile production --non-interactive --message "Release 1.1.0 - Reports, archive recovery, layout toggle, reorder and Play Store polish"`
+- Production Android bundle: `npx eas-cli@latest build --platform android --profile production --non-interactive --message "Release 1.1.1 - Patch update"`
 - Local: `npx expo prebuild --platform android --clean`
 `npx expo run:android`
 
@@ -37,31 +37,23 @@ This project intentionally keeps exactly three top-level documentation files:
 ## Release readiness
 
 - Version metadata:
-	- `package.json`: `1.1.0`
-	- `app.json` Expo version: `1.1.0`
-	- `app.json` Android `versionCode`: `8`
+	- `package.json`: `1.1.1`
+	- `app.json` Expo version: `1.1.1`
+	- `app.json` Android `versionCode`: `9`
 - Local validation before release:
 	- `npm run lint`
 	- `npm run test`
 	- `npx expo-doctor`
 - Play Store submission:
-	- Build and auto-submit: `npx eas-cli@latest build --platform android --profile production --auto-submit --non-interactive --message "Release 1.1.0 - Reports, archive recovery, layout toggle, reorder and Play Store polish"`
+	- Build and auto-submit: `npx eas-cli@latest build --platform android --profile production --auto-submit --non-interactive --message "Release 1.1.1 - Patch update"`
 	- Manual submit if needed: `npx eas-cli@latest submit --platform android --profile production`
 - Deobfuscation support:
 	- Production builds keep `android/app/build/outputs/mapping/release/mapping.txt` as an EAS build artifact for Play Console crash/ANR deobfuscation uploads.
 - Current EAS submit profile targets the Play internal track first.
 
-## Release notes 1.1.0
+## Release notes 1.1.1
 
-Suggested Play Store patch notes:
-
-- Added annual report view with copy and PDF export.
-- Added archived counter recovery flow.
-- Added list and grid layout toggle with saved preference.
-- Added drag-and-drop counter reordering.
-- Improved topbar quick actions, language selection, and theme switching.
-- Polished report modal scrolling, collapsed year sections, and loading feedback.
-- Improved development preview data for store screenshots while keeping production clean.
+- Patch update: Internal improvements, documentation, and version bump for Expo deployment readiness.
 
 ## Recent updates
 
