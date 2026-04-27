@@ -7,6 +7,7 @@
 - NativeWind for styling and theme support
 - Expo Print + Expo Sharing for annual report export
 - Expo Clipboard for report copy actions
+- Expo Notifications for daily counter reminders (development build only)
 
 ## App flow
 

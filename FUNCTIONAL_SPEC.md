@@ -13,6 +13,11 @@
 9. Users can open an annual report with year-end maximum values, copy it, and export it as PDF.
 10. Users can reorder counters by long-pressing a counter and dragging it directly to a new position.
 11. Users can switch the home view between a list and a two-column grid from the topbar menu.
+12. Users can reset a single counter to 0 from the edit form without losing its history.
+13. Users can reset all counters to 0 at once from the topbar menu without losing history.
+14. Users can undo a same-day reset to restore counter values from the topbar menu.
+15. Users can navigate to the home screen by tapping the app title or the Home item in the topbar menu.
+16. Users can schedule a daily reminder notification to update their counters (requires a development build).
 
 ## Validation and input rules
 
@@ -40,6 +45,9 @@
 7. Display order is 0-indexed and counters are sorted by displayOrder on retrieval.
 8. Layout mode is persisted in configuration and restored on startup.
 9. Development preview counters are seeded only in development builds and are purged in production builds.
+10. Counter reset writes a 0 value as a new history entry for the current day; previous history is preserved.
+11. Undo reset removes the current day's 0 entry and restores each counter to its most recent prior value. Only reliable if performed on the same day as the reset and before any further changes.
+12. In Expo Go, development preview counters are always re-seeded on every app launch to restore test state.
 
 ## UI state behavior
 
@@ -54,6 +62,9 @@
 9. Annual report opens in a modal with immediate loading feedback.
 10. Annual report content scrolls inside the modal without overflowing the screen.
 11. Annual report year sections are collapsed by default and expand on tap.
+12. Topbar menu order: Home, Grid, Theme, Language, Report, Reset all, Undo reset.
+13. Reset icon appears in the top-right corner of the edit form, aligned with the title and subtitle.
+14. Status bar text color adapts to light and dark theme across all screens.
 
 ## Quality gates
 
@@ -72,8 +83,8 @@
 - Tests: npm run test
 - Expo health checks: npx expo-doctor
 - Preview build: eas build -p android --profile preview
-- Production Android build: npx eas-cli@latest build --platform android --profile production --non-interactive --message "Release 1.1.0"
-- Production Android build and submit: npx eas-cli@latest build --platform android --profile production --auto-submit --non-interactive --message "Release 1.1.0"
+- Production Android build: npx eas-cli@latest build --platform android --profile production --non-interactive --message "Release 1.1.2"
+- Production Android build and submit: npx eas-cli@latest build --platform android --profile production --auto-submit --non-interactive --message "Release 1.1.2"
 
 ## Maintenance baseline
 
@@ -81,3 +92,4 @@
 2. Dependency security baseline requires npm audit total vulnerabilities to remain at 0.
 3. Any dependency update must preserve lint, tests, and expo-doctor passing status.
 4. Release 1.1.0 uses Expo app version `1.1.0` and Android `versionCode` `8`.
+5. Release 1.1.2 uses Expo app version `1.1.2` and Android `versionCode` `10`.

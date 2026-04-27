@@ -11,7 +11,7 @@ import { useCounter } from "../lib/counterContext";
 import { SUPPORTED_LANGUAGES, useI18n } from "../lib/i18n";
 import { useToast } from "../lib/toastProvider";
 import { DEFAULT_LAYOUT_MODE, GRID_LAYOUT_MODE } from "../lib/layoutMode";
-import { getArchivedCounters, getConfig, getCounters, getCountersValues, resetAllCounters, undoResetAllCounters, updateConfig } from "../lib/db/database";
+import { getArchivedCounters, getConfig, getCounters, getCountersValues, resetAllCounters, updateConfig } from "../lib/db/database";
 import { buildYearEndGroupedReport, buildYearEndReportText, buildYearSectionText, toggleExpandedReportYear } from "../lib/reporting";
 import { cancelCounterReminder, requestNotificationPermission, scheduleCounterReminder } from "../lib/notifications";
 import { useColorScheme } from "nativewind";
@@ -34,7 +34,6 @@ export function Topbar() {
   const isHomePath = path === "/";
   const isCounterDetailPath = regex.test(path);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [topbarHeight, setTopbarHeight] = useState(insets.top + 72);
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
   const [isNotificationsModalVisible, setIsNotificationsModalVisible] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -166,16 +165,6 @@ export function Topbar() {
     });
   };
 
-  const handleUndoReset = () => {
-    setIsMenuOpen(false);
-    const wasRestored = undoResetAllCounters();
-    if (!wasRestored) {
-      toast.error(t("alert.resetError"), t("alert.resetAllFailed"));
-      return;
-    }
-    triggerRefresh();
-  };
-
   const handleResetAll = () => {
     setIsMenuOpen(false);
     Alert.alert(
@@ -243,7 +232,6 @@ export function Topbar() {
     <View
       className="flex-row items-center justify-between px-4 pb-4 border-b bg-stone-100 dark:bg-stone-950 border-stone-200 dark:border-stone-800"
       style={{ paddingTop: insets.top + 10, minHeight: insets.top + 72 }}
-      onLayout={(e) => setTopbarHeight(e.nativeEvent.layout.height)}
     >
       <View className="items-start justify-center w-11 h-11">
         <Pressable
@@ -383,15 +371,6 @@ export function Topbar() {
                 <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.resetAll")}</Text>
               </Pressable>
 
-              <Pressable
-                onPress={handleUndoReset}
-                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-                accessibilityRole="button"
-                accessibilityLabel={t("topbar.undoReset")}
-              >
-                <MaterialCommunityIcons name="undo" size={18} color={iconColor} />
-                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.undoReset")}</Text>
-              </Pressable>
             </Pressable>
           </View>
         </Pressable>

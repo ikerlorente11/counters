@@ -1,6 +1,6 @@
 # Counters
 
-Current release target: 1.1.1
+Current release target: 1.1.2
 
 ## Documentation
 
@@ -29,7 +29,7 @@ This project intentionally keeps exactly three top-level documentation files:
 ## Build
 
 - Preview build: `eas build -p android --profile preview`
-- Production Android bundle: `npx eas-cli@latest build --platform android --profile production --non-interactive --message "Release 1.1.1 - Patch update"`
+- Production Android bundle: `npx eas-cli@latest build --platform android --profile production --non-interactive --message "Release 1.1.2 - Patch update"`
 - Local: `npx expo prebuild --platform android --clean`
 `npx expo run:android`
 
@@ -37,19 +37,29 @@ This project intentionally keeps exactly three top-level documentation files:
 ## Release readiness
 
 - Version metadata:
-	- `package.json`: `1.1.1`
-	- `app.json` Expo version: `1.1.1`
-	- `app.json` Android `versionCode`: `9`
+	- `package.json`: `1.1.2`
+	- `app.json` Expo version: `1.1.2`
+	- `app.json` Android `versionCode`: `10`
 - Local validation before release:
 	- `npm run lint`
 	- `npm run test`
 	- `npx expo-doctor`
 - Play Store submission:
-	- Build and auto-submit: `npx eas-cli@latest build --platform android --profile production --auto-submit --non-interactive --message "Release 1.1.1 - Patch update"`
+	- Build and auto-submit: `npx eas-cli@latest build --platform android --profile production --auto-submit --non-interactive --message "Release 1.1.2 - Patch update"`
 	- Manual submit if needed: `npx eas-cli@latest submit --platform android --profile production`
 - Deobfuscation support:
 	- Production builds keep `android/app/build/outputs/mapping/release/mapping.txt` as an EAS build artifact for Play Console crash/ANR deobfuscation uploads.
 - Current EAS submit profile targets the Play internal track first.
+
+## Release notes 1.1.2
+
+- Added counter reset: reset a single counter to 0 from the edit form (icon in top-right corner) without losing its history.
+- Added reset all: reset all counters to 0 at once from the topbar menu without losing history.
+- Added undo reset: recover counter values after a same-day reset from the topbar menu.
+- Added home navigation: tap the app title or the Home menu item to return to the home screen from any screen.
+- Reordered topbar menu: Grid, Theme, Language, Report, Reset all, Undo reset.
+- Fixed status bar text color adapting to light and dark theme across all screens.
+- Fixed app loading in Expo Go after expo-notifications compatibility changes for SDK 53+.
 
 ## Release notes 1.1.1
 
@@ -57,6 +67,9 @@ This project intentionally keeps exactly three top-level documentation files:
 
 ## Recent updates
 
+- Added counter reset (single and all) with history preservation and same-day undo.
+- Added home navigation shortcut via app title tap and topbar menu item.
+- Fixed status bar theme adaptation and Expo Go startup compatibility.
 - Migrated project to Expo SDK 54 with dependency alignment.
 - Applied dependency security remediation and verified zero npm audit vulnerabilities.
 - Added English and Spanish UI localization based on device language.
