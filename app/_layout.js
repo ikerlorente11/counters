@@ -1,5 +1,5 @@
-import { LogBox, UIManager, View } from "react-native";
-import { useState, useEffect, useCallback } from "react";
+import { LogBox, UIManager, View, StatusBar } from "react-native";
+import { useState, useEffect } from "react";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as SplashScreen from "expo-splash-screen";
@@ -24,7 +24,7 @@ if (typeof UIManager.setLayoutAnimationEnabledExperimental === "function") {
 }
 
 export default function Layout() {
-  const { setColorScheme } = useColorScheme();
+  const { setColorScheme, colorScheme } = useColorScheme();
   const [isReady, setIsReady] = useState(false);
   const [initialLanguage, setInitialLanguage] = useState("en");
   const [initialLayoutMode, setInitialLayoutMode] = useState("list");
@@ -63,16 +63,22 @@ export default function Layout() {
     }, 0);
   }, []);
 
-  const onRootLayout = useCallback(() => {
+  useEffect(() => {
     if (isReady) {
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync().catch(() => {});
     }
   }, [isReady]);
 
   if (!isReady) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }} onLayout={onRootLayout}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <StatusBar
+        animated
+        backgroundColor="transparent"
+        translucent
+        barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+      />
       <ToastProvider>
         <I18nProvider initialLanguage={initialLanguage}>
           <CounterProvider initialLayoutMode={initialLayoutMode}>

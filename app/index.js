@@ -1,4 +1,4 @@
-import { View, StatusBar, ScrollView, Text } from "react-native";
+import { View, ScrollView, Text } from "react-native";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -24,7 +24,7 @@ export default function Index() {
   const [draggingId, setDraggingId] = useState(null);
   const [dragCompensation, setDragCompensation] = useState({ x: 0, y: 0 });
   const [listWidth, setListWidth] = useState(0);
-  const { setCounterId, layoutMode } = useCounter();
+  const { setCounterId, layoutMode, refreshKey } = useCounter();
   const countersRef = useRef([]);
   const dragStartCountersRef = useRef([]);
   const dragStartOrderRef = useRef([]);
@@ -35,6 +35,19 @@ export default function Index() {
   useEffect(() => {
     countersRef.current = counters;
   }, [counters]);
+
+  useEffect(() => {
+    if (refreshKey === 0) return;
+    const countersData = getCounters().map((counter) => ({
+      id: counter.id,
+      title: counter.title,
+      value: counter.value,
+      color: counter.color,
+      backgroundColor: counter.bgColor,
+    }));
+    setCounters(countersData);
+    countersRef.current = countersData;
+  }, [refreshKey]);
 
   useFocusEffect(
     useCallback(() => {
@@ -132,7 +145,6 @@ export default function Index() {
   return (
     <SafeAreaProvider>
       <View className="flex-1 bg-stone-100 dark:bg-stone-950">
-        <StatusBar animated={true} backgroundColor="transparent" barStyle="light-content" />
         <ScrollView
           contentContainerStyle={{
             paddingHorizontal: 16,

@@ -1,4 +1,5 @@
 import { Alert, View, Text, Modal, Pressable, FlatList } from "react-native";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
@@ -10,6 +11,7 @@ import {
   restoreCounter,
   updateCounter,
   deleteCounter,
+  resetCounter,
 } from "../../lib/db/database";
 import { useI18n } from "../../lib/i18n";
 import { useToast } from "../../lib/toastProvider";
@@ -48,6 +50,7 @@ export function Form({ id, initialOpenArchived = false }) {
   const { t } = useI18n();
   const toast = useToast();
   const { colorScheme } = useColorScheme();
+  const iconColor = colorScheme === "dark" ? "#f5f5f4" : "#111827";
   const defaultColors = getDefaultCounterColors(colorScheme);
 
   const [title, setTitle] = useState(t("form.defaultCounterTitle"));
@@ -174,6 +177,33 @@ export function Form({ id, initialOpenArchived = false }) {
     );
   };
 
+  const reset = () => {
+    Alert.alert(
+      t("alert.resetConfirmTitle"),
+      t("alert.resetConfirmBody"),
+      [
+        {
+          text: t("form.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("alert.resetAction"),
+          style: "destructive",
+          onPress: () => {
+            const wasReset = resetCounter({ id });
+            if (!wasReset) {
+              toast.error(t("alert.resetError"), t("alert.resetFailed"));
+              return;
+            }
+
+            router.dismissAll();
+            router.replace("/");
+          },
+        },
+      ],
+    );
+  };
+
   const openArchivedCounters = () => {
     const archived = getArchivedCounters();
     setArchivedCounters(archived);
@@ -194,12 +224,26 @@ export function Form({ id, initialOpenArchived = false }) {
 
   return (
     <View className="pt-3">
-      <Text className="text-3xl font-black tracking-tight text-stone-900 dark:text-stone-100">
-        {id === 0 ? t("form.createCounter") : t("form.editCounter")}
-      </Text>
-      <Text className="mt-1 mb-5 text-base text-stone-600 dark:text-stone-300">
-        {t("form.subtitle")}
-      </Text>
+      <View className="flex-row items-start justify-between">
+        <View className="flex-1 pr-3">
+          <Text className="text-3xl font-black tracking-tight text-stone-900 dark:text-stone-100">
+            {id === 0 ? t("form.createCounter") : t("form.editCounter")}
+          </Text>
+          <Text className="mt-1 mb-5 text-base text-stone-600 dark:text-stone-300">
+            {t("form.subtitle")}
+          </Text>
+        </View>
+        {id !== 0 ? (
+          <Pressable
+            onPress={reset}
+            className="items-center justify-center w-11 h-11 rounded-2xl bg-stone-200 dark:bg-stone-800"
+            accessibilityRole="button"
+            accessibilityLabel={t("form.resetCounter")}
+          >
+            <MaterialCommunityIcons name="restore" size={22} color={iconColor} />
+          </Pressable>
+        ) : null}
+      </View>
 
       <View className="px-4 py-3 border rounded-3xl border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900">
         <LineText name={t("form.name")} value={title} state={setTitle} />

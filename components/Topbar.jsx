@@ -1,7 +1,7 @@
-import { View, Text, Pressable, Modal, ScrollView, useWindowDimensions, InteractionManager, StyleSheet, Animated } from "react-native";
+import { View, Text, Pressable, Modal, ScrollView, useWindowDimensions, InteractionManager, StyleSheet, Animated, Alert } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Link, usePathname } from "expo-router";
+import { Link, usePathname, useRouter } from "expo-router";
 import * as Clipboard from "expo-clipboard";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
@@ -11,7 +11,7 @@ import { useCounter } from "../lib/counterContext";
 import { SUPPORTED_LANGUAGES, useI18n } from "../lib/i18n";
 import { useToast } from "../lib/toastProvider";
 import { DEFAULT_LAYOUT_MODE, GRID_LAYOUT_MODE } from "../lib/layoutMode";
-import { getArchivedCounters, getConfig, getCounters, getCountersValues, updateConfig } from "../lib/db/database";
+import { getArchivedCounters, getConfig, getCounters, getCountersValues, resetAllCounters, undoResetAllCounters, updateConfig } from "../lib/db/database";
 import { buildYearEndGroupedReport, buildYearEndReportText, buildYearSectionText, toggleExpandedReportYear } from "../lib/reporting";
 import { cancelCounterReminder, requestNotificationPermission, scheduleCounterReminder } from "../lib/notifications";
 import { useColorScheme } from "nativewind";
@@ -22,6 +22,7 @@ import { useColorScheme } from "nativewind";
  */
 export function Topbar() {
   const { t, language, setLanguage } = useI18n();
+  const router = useRouter();
   const toast = useToast();
   const { colorScheme, setColorScheme } = useColorScheme();
   const { height: windowHeight } = useWindowDimensions();
@@ -29,10 +30,11 @@ export function Topbar() {
   const insets = useSafeAreaInsets();
   const path = usePathname();
   const regex = /^\/counter\/\d+$/;
-  const { counterId, layoutMode, setLayoutMode } = useCounter();
+  const { counterId, layoutMode, setLayoutMode, triggerRefresh } = useCounter();
   const isHomePath = path === "/";
   const isCounterDetailPath = regex.test(path);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [topbarHeight, setTopbarHeight] = useState(insets.top + 72);
   const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
   const [isNotificationsModalVisible, setIsNotificationsModalVisible] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -121,6 +123,11 @@ export function Topbar() {
     setIsNotificationsModalVisible(false);
   };
 
+  const handleGoHome = () => {
+    setIsMenuOpen(false);
+    router.replace("/");
+  };
+
   const handleToggleTheme = () => {
     setColorScheme(colorScheme === "dark" ? "light" : "dark");
     setIsMenuOpen(false);
@@ -157,6 +164,42 @@ export function Topbar() {
         setIsLoadingReport(false);
       });
     });
+  };
+
+  const handleUndoReset = () => {
+    setIsMenuOpen(false);
+    const wasRestored = undoResetAllCounters();
+    if (!wasRestored) {
+      toast.error(t("alert.resetError"), t("alert.resetAllFailed"));
+      return;
+    }
+    triggerRefresh();
+  };
+
+  const handleResetAll = () => {
+    setIsMenuOpen(false);
+    Alert.alert(
+      t("alert.resetAllConfirmTitle"),
+      t("alert.resetAllConfirmBody"),
+      [
+        {
+          text: t("form.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("alert.resetAction"),
+          style: "destructive",
+          onPress: () => {
+            const wasReset = resetAllCounters();
+            if (!wasReset) {
+              toast.error(t("alert.resetError"), t("alert.resetAllFailed"));
+              return;
+            }
+            triggerRefresh();
+          },
+        },
+      ],
+    );
   };
 
   const closeReportModal = () => {
@@ -200,6 +243,7 @@ export function Topbar() {
     <View
       className="flex-row items-center justify-between px-4 pb-4 border-b bg-stone-100 dark:bg-stone-950 border-stone-200 dark:border-stone-800"
       style={{ paddingTop: insets.top + 10, minHeight: insets.top + 72 }}
+      onLayout={(e) => setTopbarHeight(e.nativeEvent.layout.height)}
     >
       <View className="items-start justify-center w-11 h-11">
         <Pressable
@@ -220,12 +264,16 @@ export function Topbar() {
       </View>
 
       <View className="flex-1 items-center justify-center px-2">
-        <Text
-          numberOfLines={1}
-          className="text-3xl font-black tracking-tight text-center text-stone-900 dark:text-stone-100"
-        >
-          {t("app.title")}
-        </Text>
+        <Link href="/" asChild>
+          <Pressable accessibilityRole="link" accessibilityLabel={t("topbar.home")}>
+            <Text
+              numberOfLines={1}
+              className="text-3xl font-black tracking-tight text-center text-stone-900 dark:text-stone-100"
+            >
+              {t("app.title")}
+            </Text>
+          </Pressable>
+        </Link>
       </View>
 
       <View className="items-end justify-center w-11 h-11">
@@ -256,29 +304,19 @@ export function Topbar() {
           }}
           className="flex-1"
         >
-          <View className="flex-1" style={{ paddingTop: insets.top + 58, paddingLeft: 16 }}>
+          <View className="flex-1" style={{ paddingTop: insets.top + 25, paddingLeft: 16 }}>
             <Pressable
               onPress={() => { }}
               className="w-44 p-2 border rounded-2xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
             >
               <Pressable
-                onPress={handleShowReport}
+                onPress={handleGoHome}
                 className="flex-row items-center px-3 py-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
                 accessibilityRole="button"
-                accessibilityLabel={t("topbar.report")}
+                accessibilityLabel={t("topbar.home")}
               >
-                <MaterialCommunityIcons name="file-chart-outline" size={18} color={iconColor} />
-                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.report")}</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleChangeLanguage}
-                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-                accessibilityRole="button"
-                accessibilityLabel={t("topbar.language")}
-              >
-                <MaterialCommunityIcons name="translate" size={18} color={iconColor} />
-                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.language")}</Text>
+                <MaterialCommunityIcons name="home-outline" size={18} color={iconColor} />
+                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.home")}</Text>
               </Pressable>
 
               <Pressable
@@ -313,6 +351,46 @@ export function Topbar() {
               >
                 <MaterialCommunityIcons name={notificationsEnabled ? "bell" : "bell-outline"} size={18} color={iconColor} />
                 <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("notifications.menuLabel")}</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleChangeLanguage}
+                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+                accessibilityRole="button"
+                accessibilityLabel={t("topbar.language")}
+              >
+                <MaterialCommunityIcons name="translate" size={18} color={iconColor} />
+                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.language")}</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleShowReport}
+                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+                accessibilityRole="button"
+                accessibilityLabel={t("topbar.report")}
+              >
+                <MaterialCommunityIcons name="file-chart-outline" size={18} color={iconColor} />
+                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.report")}</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleResetAll}
+                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+                accessibilityRole="button"
+                accessibilityLabel={t("topbar.resetAll")}
+              >
+                <MaterialCommunityIcons name="refresh" size={18} color={iconColor} />
+                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.resetAll")}</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleUndoReset}
+                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
+                accessibilityRole="button"
+                accessibilityLabel={t("topbar.undoReset")}
+              >
+                <MaterialCommunityIcons name="undo" size={18} color={iconColor} />
+                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.undoReset")}</Text>
               </Pressable>
             </Pressable>
           </View>
