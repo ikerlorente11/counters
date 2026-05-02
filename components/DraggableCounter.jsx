@@ -10,6 +10,10 @@ import Animated, {
     withTiming,
 } from "react-native-reanimated";
 import Color from "color";
+import {
+    playCounterTapFeedback,
+    prepareCounterTapFeedback,
+} from "../lib/counterFeedback";
 import { updateCounterValue } from "../lib/db/database";
 import { useI18n } from "../lib/i18n";
 import { GRID_LAYOUT_MODE } from "../lib/layoutMode";
@@ -61,7 +65,6 @@ export function DraggableCounter({
 }) {
     const { t } = useI18n();
     const [counterValue, setCounterValue] = useState(Number.parseInt(counter.value, 10) || 0);
-    const [isPressed, setIsPressed] = useState(false);
     const dragX = useSharedValue(0);
     const dragY = useSharedValue(0);
     const entranceOpacity = useSharedValue(0);
@@ -82,20 +85,28 @@ export function DraggableCounter({
         entranceTranslate.value = withTiming(0, { duration: 220 });
     }, [entranceOpacity, entranceTranslate]);
 
-    const handleIncrement = () => {
+    useEffect(() => {
+        void prepareCounterTapFeedback();
+    }, []);
+
+    const handleValueChange = (delta) => {
         setCounterValue((previousValue) => {
-            const nextValue = previousValue + 1;
+            const nextValue = previousValue + delta;
             updateCounterValue({ id: counter.id, value: nextValue });
             return nextValue;
         });
     };
 
+    const handleTapFeedback = () => {
+        void playCounterTapFeedback();
+    };
+
+    const handleIncrement = () => {
+        handleValueChange(1);
+    };
+
     const handleDecrement = () => {
-        setCounterValue((previousValue) => {
-            const nextValue = previousValue - 1;
-            updateCounterValue({ id: counter.id, value: nextValue });
-            return nextValue;
-        });
+        handleValueChange(-1);
     };
 
     const dragGesture = Gesture.Pan()
@@ -103,7 +114,6 @@ export function DraggableCounter({
         .maxPointers(1)
         .onStart(() => {
             dragScale.value = withTiming(1.01, { duration: 90 });
-            runOnJS(setIsPressed)(false);
             if (onDragStateChange) {
                 runOnJS(onDragStateChange)(counter.id, true);
             }
@@ -140,7 +150,7 @@ export function DraggableCounter({
         transform: [
             { translateY: entranceTranslate.value + dragY.value + dragCompensation.y },
             { translateX: dragX.value + dragCompensation.x },
-            { scale: dragScale.value * (isPressed ? 0.992 : 1) },
+            { scale: dragScale.value },
         ],
         zIndex: isDragging ? 30 : 1,
     }));
@@ -166,14 +176,13 @@ export function DraggableCounter({
             >
                 {isGridLayout ? null : (
                     <Pressable
+                        onPressIn={handleTapFeedback}
                         onPress={handleDecrement}
-                        onPressIn={() => {
-                            setIsPressed(true);
-                        }}
-                        onPressOut={() => {
-                            setIsPressed(false);
-                        }}
-                        style={[styles.button, { backgroundColor: accentColor }]}
+                        style={({ pressed }) => [
+                            styles.button,
+                            pressed ? styles.buttonPressed : null,
+                            { backgroundColor: accentColor },
+                        ]}
                         accessibilityRole="button"
                         accessibilityLabel={t("counter.decrement", { title: counter.title })}
                     >
@@ -199,28 +208,28 @@ export function DraggableCounter({
                     {isGridLayout ? (
                         <View style={styles.buttonRowGrid}>
                             <Pressable
+                                onPressIn={handleTapFeedback}
                                 onPress={handleDecrement}
-                                onPressIn={() => {
-                                    setIsPressed(true);
-                                }}
-                                onPressOut={() => {
-                                    setIsPressed(false);
-                                }}
-                                style={[styles.button, styles.buttonGridHalf, { backgroundColor: accentColor }]}
+                                style={({ pressed }) => [
+                                    styles.button,
+                                    styles.buttonGridHalf,
+                                    pressed ? styles.buttonPressed : null,
+                                    { backgroundColor: accentColor },
+                                ]}
                                 accessibilityRole="button"
                                 accessibilityLabel={t("counter.decrement", { title: counter.title })}
                             >
                                 <Minus color={counter.color} size={22} />
                             </Pressable>
                             <Pressable
+                                onPressIn={handleTapFeedback}
                                 onPress={handleIncrement}
-                                onPressIn={() => {
-                                    setIsPressed(true);
-                                }}
-                                onPressOut={() => {
-                                    setIsPressed(false);
-                                }}
-                                style={[styles.button, styles.buttonGridHalf, { backgroundColor: accentColor }]}
+                                style={({ pressed }) => [
+                                    styles.button,
+                                    styles.buttonGridHalf,
+                                    pressed ? styles.buttonPressed : null,
+                                    { backgroundColor: accentColor },
+                                ]}
                                 accessibilityRole="button"
                                 accessibilityLabel={t("counter.increment", { title: counter.title })}
                             >
@@ -232,14 +241,13 @@ export function DraggableCounter({
 
                 {isGridLayout ? null : (
                     <Pressable
+                        onPressIn={handleTapFeedback}
                         onPress={handleIncrement}
-                        onPressIn={() => {
-                            setIsPressed(true);
-                        }}
-                        onPressOut={() => {
-                            setIsPressed(false);
-                        }}
-                        style={[styles.button, { backgroundColor: accentColor }]}
+                        style={({ pressed }) => [
+                            styles.button,
+                            pressed ? styles.buttonPressed : null,
+                            { backgroundColor: accentColor },
+                        ]}
                         accessibilityRole="button"
                         accessibilityLabel={t("counter.increment", { title: counter.title })}
                     >
@@ -313,6 +321,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         height: 88,
         justifyContent: "center",
+    },
+    buttonPressed: {
+        opacity: 0.88,
+        transform: [{ scale: 0.94 }],
     },
     buttonGrid: {
         width: "100%",

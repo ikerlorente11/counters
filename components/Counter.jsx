@@ -2,6 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { View, StyleSheet, Text, Pressable, Animated } from "react-native";
 import { Link } from "expo-router";
 import { updateCounterValue } from "../lib/db/database";
+import {
+  playCounterTapFeedback,
+  prepareCounterTapFeedback,
+} from "../lib/counterFeedback";
 import { useI18n } from "../lib/i18n";
 import { Plus, Minus } from "./Icons";
 import Color from "color";
@@ -36,7 +40,6 @@ export function Counter({ counter }) {
   const [counterValue, setCounterValue] = useState(
     Number.parseInt(counter.value, 10) || 0,
   );
-  const [isPressed, setIsPressed] = useState(false);
   const entranceOpacity = useRef(new Animated.Value(0)).current;
   const entranceTranslate = useRef(new Animated.Value(10)).current;
   const { accentColor, cardColor } = getSafeCardPalette(counter.backgroundColor);
@@ -56,20 +59,28 @@ export function Counter({ counter }) {
     ]).start();
   }, [entranceOpacity, entranceTranslate]);
 
-  const handleIncrement = () => {
+  useEffect(() => {
+    void prepareCounterTapFeedback();
+  }, []);
+
+  const handleValueChange = (delta) => {
     setCounterValue((previousValue) => {
-      const nextValue = previousValue + 1;
+      const nextValue = previousValue + delta;
       updateCounterValue({ id: counter.id, value: nextValue });
       return nextValue;
     });
   };
 
+  const handleTapFeedback = () => {
+    void playCounterTapFeedback();
+  };
+
+  const handleIncrement = () => {
+    handleValueChange(1);
+  };
+
   const handleDecrement = () => {
-    setCounterValue((previousValue) => {
-      const nextValue = previousValue - 1;
-      updateCounterValue({ id: counter.id, value: nextValue });
-      return nextValue;
-    });
+    handleValueChange(-1);
   };
 
   return (
@@ -80,23 +91,19 @@ export function Counter({ counter }) {
           borderColor: accentColor,
           backgroundColor: cardColor,
           opacity: entranceOpacity,
-          transform: [
-            { translateY: entranceTranslate },
-            { scale: isPressed ? 0.992 : 1 },
-          ],
+          transform: [{ translateY: entranceTranslate }],
         },
       ]}
       key={counter.id}
     >
       <Pressable
+        onPressIn={handleTapFeedback}
         onPress={handleDecrement}
-        onPressIn={() => {
-          setIsPressed(true);
-        }}
-        onPressOut={() => {
-          setIsPressed(false);
-        }}
-        style={[styles.button, { backgroundColor: accentColor }]}
+        style={({ pressed }) => [
+          styles.button,
+          pressed ? styles.buttonPressed : null,
+          { backgroundColor: accentColor },
+        ]}
         accessibilityRole="button"
         accessibilityLabel={t("counter.decrement", { title: counter.title })}
       >
@@ -118,14 +125,13 @@ export function Counter({ counter }) {
         </Link>
       </View>
       <Pressable
+        onPressIn={handleTapFeedback}
         onPress={handleIncrement}
-        onPressIn={() => {
-          setIsPressed(true);
-        }}
-        onPressOut={() => {
-          setIsPressed(false);
-        }}
-        style={[styles.button, { backgroundColor: accentColor }]}
+        style={({ pressed }) => [
+          styles.button,
+          pressed ? styles.buttonPressed : null,
+          { backgroundColor: accentColor },
+        ]}
         accessibilityRole="button"
         accessibilityLabel={t("counter.increment", { title: counter.title })}
       >
@@ -172,5 +178,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 88,
     justifyContent: "center",
+  },
+  buttonPressed: {
+    opacity: 0.88,
+    transform: [{ scale: 0.94 }],
   },
 });
