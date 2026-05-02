@@ -1,5 +1,6 @@
 import { View, Text, Pressable, Modal, ScrollView, useWindowDimensions, InteractionManager, StyleSheet, Animated, Alert } from "react-native";
 import { useEffect, useRef, useState } from "react";
+import Slider from "@react-native-community/slider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link, usePathname, useRouter } from "expo-router";
 import * as Clipboard from "expo-clipboard";
@@ -8,6 +9,13 @@ import * as Sharing from "expo-sharing";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Add, Edit } from './Icons';
 import { useCounter } from "../lib/counterContext";
+import {
+  getCounterFeedbackPreferences,
+  normalizeCounterFeedbackLevel,
+  playCounterTapFeedback,
+  prepareCounterTapFeedback,
+  setCounterFeedbackPreferences,
+} from "../lib/counterFeedback";
 import { SUPPORTED_LANGUAGES, useI18n } from "../lib/i18n";
 import { useToast } from "../lib/toastProvider";
 import { DEFAULT_LAYOUT_MODE, GRID_LAYOUT_MODE } from "../lib/layoutMode";
@@ -15,6 +23,10 @@ import { getArchivedCounters, getConfig, getCounters, getCountersValues, resetAl
 import { buildYearEndGroupedReport, buildYearEndReportText, buildYearSectionText, toggleExpandedReportYear } from "../lib/reporting";
 import { cancelCounterReminder, requestNotificationPermission, scheduleCounterReminder } from "../lib/notifications";
 import { useColorScheme } from "nativewind";
+
+const TAP_SOUND_VOLUME_CONFIG_FIELD = "tapSoundVolume";
+const VIBRATION_STRENGTH_CONFIG_FIELD = "vibrationStrength";
+const AUDIO_PREVIEW_THROTTLE_MS = 90;
 
 /**
  * Global top bar with theme toggle and contextual action button.
@@ -31,6 +43,7 @@ export function Topbar() {
   const path = usePathname();
   const regex = /^\/counter\/\d+$/;
   const { counterId, layoutMode, setLayoutMode, triggerRefresh } = useCounter();
+  const initialFeedbackPreferences = getCounterFeedbackPreferences();
   const isHomePath = path === "/";
   const isCounterDetailPath = regex.test(path);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -39,12 +52,59 @@ export function Topbar() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationHour, setNotificationHour] = useState(9);
   const [notificationMinute, setNotificationMinute] = useState(0);
+  const [tapSoundVolume, setTapSoundVolume] = useState(initialFeedbackPreferences.tapSoundVolume);
+  const [vibrationStrength, setVibrationStrength] = useState(initialFeedbackPreferences.vibrationStrength);
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [reportGroups, setReportGroups] = useState([]);
   const [expandedReportYears, setExpandedReportYears] = useState([]);
   const [isLoadingReport, setIsLoadingReport] = useState(false);
+  const audioSettingsSnapshotRef = useRef(initialFeedbackPreferences);
+  const audioPreviewTimeoutRef = useRef(null);
+  const lastAudioPreviewAtRef = useRef(0);
   const reportContentOpacity = useRef(new Animated.Value(0)).current;
   const nextLayoutLabel = layoutMode === GRID_LAYOUT_MODE ? t("topbar.list") : t("topbar.grid");
+
+  const readPersistedAudioSettings = () => {
+    const fallbackSettings = audioSettingsSnapshotRef.current;
+
+    return {
+      tapSoundVolume: normalizeCounterFeedbackLevel(
+        getConfig(TAP_SOUND_VOLUME_CONFIG_FIELD),
+        fallbackSettings.tapSoundVolume,
+      ),
+      vibrationStrength: normalizeCounterFeedbackLevel(
+        getConfig(VIBRATION_STRENGTH_CONFIG_FIELD),
+        fallbackSettings.vibrationStrength,
+      ),
+    };
+  };
+
+  const applyAudioSettings = (settings) => {
+    setTapSoundVolume(settings.tapSoundVolume);
+    setVibrationStrength(settings.vibrationStrength);
+    setCounterFeedbackPreferences(settings);
+  };
+
+  const triggerAudioSettingsPreview = () => {
+    const now = Date.now();
+    const elapsed = now - lastAudioPreviewAtRef.current;
+
+    if (elapsed >= AUDIO_PREVIEW_THROTTLE_MS) {
+      lastAudioPreviewAtRef.current = now;
+      void playCounterTapFeedback();
+      return;
+    }
+
+    if (audioPreviewTimeoutRef.current) {
+      return;
+    }
+
+    audioPreviewTimeoutRef.current = setTimeout(() => {
+      audioPreviewTimeoutRef.current = null;
+      lastAudioPreviewAtRef.current = Date.now();
+      void playCounterTapFeedback();
+    }, AUDIO_PREVIEW_THROTTLE_MS - elapsed);
+  };
 
   let actionIcon = null;
   let actionLabel = t("topbar.openAction");
@@ -76,6 +136,20 @@ export function Topbar() {
     setNotificationsEnabled(enabled);
     setNotificationHour(Number.isNaN(hour) ? 9 : hour);
     setNotificationMinute(Number.isNaN(minute) ? 0 : minute);
+
+    const persistedAudioSettings = readPersistedAudioSettings();
+    audioSettingsSnapshotRef.current = persistedAudioSettings;
+    applyAudioSettings(persistedAudioSettings);
+
+    void prepareCounterTapFeedback();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (audioPreviewTimeoutRef.current) {
+        clearTimeout(audioPreviewTimeoutRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -99,6 +173,45 @@ export function Topbar() {
   const handleOpenNotifications = () => {
     setIsNotificationsModalVisible(true);
     setIsMenuOpen(false);
+  };
+
+  const persistAudioSettings = ({ nextTapSoundVolume = tapSoundVolume, nextVibrationStrength = vibrationStrength } = {}) => {
+    const normalizedSettings = {
+      tapSoundVolume: normalizeCounterFeedbackLevel(
+        nextTapSoundVolume,
+        audioSettingsSnapshotRef.current.tapSoundVolume,
+      ),
+      vibrationStrength: normalizeCounterFeedbackLevel(
+        nextVibrationStrength,
+        audioSettingsSnapshotRef.current.vibrationStrength,
+      ),
+    };
+
+    updateConfig({
+      field: TAP_SOUND_VOLUME_CONFIG_FIELD,
+      value: normalizedSettings.tapSoundVolume.toFixed(2),
+    });
+    updateConfig({
+      field: VIBRATION_STRENGTH_CONFIG_FIELD,
+      value: normalizedSettings.vibrationStrength.toFixed(2),
+    });
+
+    audioSettingsSnapshotRef.current = normalizedSettings;
+    applyAudioSettings(normalizedSettings);
+  };
+
+  const handleTapSoundVolumeChange = (value) => {
+    const normalizedValue = normalizeCounterFeedbackLevel(value, tapSoundVolume);
+    setTapSoundVolume(normalizedValue);
+    setCounterFeedbackPreferences({ tapSoundVolume: normalizedValue });
+    triggerAudioSettingsPreview();
+  };
+
+  const handleVibrationStrengthChange = (value) => {
+    const normalizedValue = normalizeCounterFeedbackLevel(value, vibrationStrength);
+    setVibrationStrength(normalizedValue);
+    setCounterFeedbackPreferences({ vibrationStrength: normalizedValue });
+    triggerAudioSettingsPreview();
   };
 
   const handleSaveNotifications = async () => {
@@ -340,6 +453,48 @@ export function Topbar() {
                 <MaterialCommunityIcons name={notificationsEnabled ? "bell" : "bell-outline"} size={18} color={iconColor} />
                 <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("notifications.menuLabel")}</Text>
               </Pressable>
+
+              <View className="px-3 py-3 mt-2 rounded-2xl border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800" style={{ gap: 10 }}>
+                <Text className="text-xs font-black uppercase tracking-wide text-stone-500 dark:text-stone-400">
+                  {t("feedback.menuLabel")}
+                </Text>
+
+                <View style={{ gap: 4 }}>
+                  <Text className="text-sm font-bold text-stone-900 dark:text-stone-100">{t("feedback.soundVolume")}</Text>
+                  <Slider
+                    minimumValue={0}
+                    maximumValue={1}
+                    step={0.01}
+                    value={tapSoundVolume}
+                    onValueChange={handleTapSoundVolumeChange}
+                    onSlidingComplete={(value) => {
+                      persistAudioSettings({ nextTapSoundVolume: value });
+                    }}
+                    minimumTrackTintColor={colorScheme === "dark" ? "#f5f5f4" : "#1f2937"}
+                    maximumTrackTintColor={colorScheme === "dark" ? "#52525b" : "#d6d3d1"}
+                    thumbTintColor={colorScheme === "dark" ? "#f5f5f4" : "#111827"}
+                    accessibilityLabel={t("feedback.soundVolumeAccessibility")}
+                  />
+                </View>
+
+                <View style={{ gap: 4 }}>
+                  <Text className="text-sm font-bold text-stone-900 dark:text-stone-100">{t("feedback.vibrationStrength")}</Text>
+                  <Slider
+                    minimumValue={0}
+                    maximumValue={1}
+                    step={0.01}
+                    value={vibrationStrength}
+                    onValueChange={handleVibrationStrengthChange}
+                    onSlidingComplete={(value) => {
+                      persistAudioSettings({ nextVibrationStrength: value });
+                    }}
+                    minimumTrackTintColor={colorScheme === "dark" ? "#f5f5f4" : "#1f2937"}
+                    maximumTrackTintColor={colorScheme === "dark" ? "#52525b" : "#d6d3d1"}
+                    thumbTintColor={colorScheme === "dark" ? "#f5f5f4" : "#111827"}
+                    accessibilityLabel={t("feedback.vibrationStrengthAccessibility")}
+                  />
+                </View>
+              </View>
 
               <Pressable
                 onPress={handleChangeLanguage}
