@@ -8,6 +8,7 @@ import { CounterProvider } from "../lib/counterContext";
 import { I18nProvider } from "../lib/i18n";
 import { ToastProvider } from "../lib/toastProvider";
 import { normalizeLayoutMode } from "../lib/layoutMode";
+import { normalizeUiScaleIndex, UI_SCALE_CONFIG_FIELD } from "../lib/uiScale";
 import { useColorScheme } from "nativewind";
 import { createTables, getConfig, syncDevelopmentPreviewData } from "../lib/db/database";
 import { cancelCounterReminder, scheduleCounterReminder } from "../lib/notifications";
@@ -28,6 +29,7 @@ export default function Layout() {
   const [isReady, setIsReady] = useState(false);
   const [initialLanguage, setInitialLanguage] = useState("en");
   const [initialLayoutMode, setInitialLayoutMode] = useState("list");
+  const [initialUiScaleIndex, setInitialUiScaleIndex] = useState(0);
 
   useEffect(() => {
     const tablesCreated = createTables();
@@ -40,9 +42,11 @@ export default function Layout() {
     const storedTheme = getConfig("theme") ?? "light";
     const storedLanguage = getConfig("language") ?? "en";
     const storedLayoutMode = normalizeLayoutMode(getConfig("layoutMode"));
+    const storedUiScaleIndex = normalizeUiScaleIndex(getConfig(UI_SCALE_CONFIG_FIELD));
     setColorScheme(storedTheme);
     setInitialLanguage(storedLanguage);
     setInitialLayoutMode(storedLayoutMode);
+    setInitialUiScaleIndex(storedUiScaleIndex);
     setIsReady(true);
 
     // Deferred: dev data cleanup and notification setup don't block the UI
@@ -81,7 +85,7 @@ export default function Layout() {
       />
       <ToastProvider>
         <I18nProvider initialLanguage={initialLanguage}>
-          <CounterProvider initialLayoutMode={initialLayoutMode}>
+          <CounterProvider initialLayoutMode={initialLayoutMode} initialUiScaleIndex={initialUiScaleIndex}>
             <View className="flex-1 bg-stone-100 dark:bg-stone-950">
               <Stack
                 screenOptions={{

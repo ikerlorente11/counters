@@ -17,6 +17,8 @@ import {
 import { updateCounterValue } from "../lib/db/database";
 import { useI18n } from "../lib/i18n";
 import { GRID_LAYOUT_MODE } from "../lib/layoutMode";
+import { useCounter } from "../lib/counterContext";
+import { UI_SCALE_OPTIONS } from "../lib/uiScale";
 import { Plus, Minus } from "./Icons";
 
 /**
@@ -64,6 +66,16 @@ export function DraggableCounter({
     onDrop,
 }) {
     const { t } = useI18n();
+    const { uiScaleIndex } = useCounter();
+    const scale = UI_SCALE_OPTIONS[uiScaleIndex] ?? 1;
+    const scaledStyles = useMemo(() => ({
+        counter: { minHeight: 106 * scale },
+        title: { fontSize: 16 * scale },
+        titleGrid: { fontSize: 15 * scale },
+        value: { fontSize: 38 * scale, lineHeight: 42 * scale },
+        valueGrid: { fontSize: 32 * scale, lineHeight: 36 * scale },
+        button: { width: 68 * scale, height: 88 * scale },
+    }), [scale]);
     const [counterValue, setCounterValue] = useState(Number.parseInt(counter.value, 10) || 0);
     const dragX = useSharedValue(0);
     const dragY = useSharedValue(0);
@@ -162,6 +174,7 @@ export function DraggableCounter({
                 style={[
                     styles.counter,
                     isGridLayout ? styles.counterGrid : null,
+                    isGridLayout ? null : scaledStyles.counter,
                     {
                         borderColor: accentColor,
                         backgroundColor: cardColor,
@@ -180,6 +193,7 @@ export function DraggableCounter({
                         onPress={handleDecrement}
                         style={({ pressed }) => [
                             styles.button,
+                            scaledStyles.button,
                             pressed ? styles.buttonPressed : null,
                             { backgroundColor: accentColor },
                         ]}
@@ -194,13 +208,13 @@ export function DraggableCounter({
                     <Link href={`/counter/${counter.id}`} asChild>
                         <Pressable style={[styles.data, isGridLayout ? styles.dataGrid : null]}>
                             <Text
-                                style={[styles.title, isGridLayout ? styles.titleGrid : null, { color: counter.color }]}
+                                style={[styles.title, scaledStyles.title, isGridLayout ? scaledStyles.titleGrid : null, { color: counter.color }]}
                                 numberOfLines={isGridLayout ? 2 : 1}
                                 ellipsizeMode="tail"
                             >
                                 {counter.title}
                             </Text>
-                            <Text style={[styles.value, isGridLayout ? styles.valueGrid : null, { color: counter.color }]}>
+                            <Text style={[styles.value, scaledStyles.value, isGridLayout ? scaledStyles.valueGrid : null, { color: counter.color }]}>
                                 {counterValue}
                             </Text>
                         </Pressable>
@@ -245,6 +259,7 @@ export function DraggableCounter({
                         onPress={handleIncrement}
                         style={({ pressed }) => [
                             styles.button,
+                            scaledStyles.button,
                             pressed ? styles.buttonPressed : null,
                             { backgroundColor: accentColor },
                         ]}

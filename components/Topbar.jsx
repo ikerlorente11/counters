@@ -1,6 +1,5 @@
 import { View, Text, Pressable, Modal, ScrollView, useWindowDimensions, InteractionManager, StyleSheet, Animated, Alert } from "react-native";
 import { useEffect, useRef, useState } from "react";
-import Slider from "@react-native-community/slider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Link, usePathname, useRouter } from "expo-router";
 import * as Clipboard from "expo-clipboard";
@@ -16,13 +15,15 @@ import {
   prepareCounterTapFeedback,
   setCounterFeedbackPreferences,
 } from "../lib/counterFeedback";
-import { SUPPORTED_LANGUAGES, useI18n } from "../lib/i18n";
+import { useI18n } from "../lib/i18n";
 import { useToast } from "../lib/toastProvider";
 import { DEFAULT_LAYOUT_MODE, GRID_LAYOUT_MODE } from "../lib/layoutMode";
+import { UI_SCALE_CONFIG_FIELD, UI_SCALE_OPTIONS, normalizeUiScaleIndex } from "../lib/uiScale";
 import { getArchivedCounters, getConfig, getCounters, getCountersValues, resetAllCounters, updateConfig } from "../lib/db/database";
 import { buildYearEndGroupedReport, buildYearEndReportText, buildYearSectionText, toggleExpandedReportYear } from "../lib/reporting";
 import { cancelCounterReminder, requestNotificationPermission, scheduleCounterReminder } from "../lib/notifications";
 import { useColorScheme } from "nativewind";
+import { SideMenuDrawer } from "./SideMenuDrawer";
 
 const TAP_SOUND_VOLUME_CONFIG_FIELD = "tapSoundVolume";
 const VIBRATION_STRENGTH_CONFIG_FIELD = "vibrationStrength";
@@ -42,13 +43,12 @@ export function Topbar() {
   const insets = useSafeAreaInsets();
   const path = usePathname();
   const regex = /^\/counter\/\d+$/;
-  const { counterId, layoutMode, setLayoutMode, triggerRefresh } = useCounter();
+  const { counterId, layoutMode, setLayoutMode, uiScaleIndex, setUiScaleIndex, triggerRefresh } = useCounter();
+  const scale = UI_SCALE_OPTIONS[uiScaleIndex] ?? 1;
   const initialFeedbackPreferences = getCounterFeedbackPreferences();
   const isHomePath = path === "/";
   const isCounterDetailPath = regex.test(path);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
-  const [isNotificationsModalVisible, setIsNotificationsModalVisible] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationHour, setNotificationHour] = useState(9);
   const [notificationMinute, setNotificationMinute] = useState(0);
@@ -110,10 +110,10 @@ export function Topbar() {
   let actionLabel = t("topbar.openAction");
 
   if (isHomePath) {
-    actionIcon = <Add className="text-stone-900 dark:text-stone-100" size={24} />;
+    actionIcon = <Add className="text-stone-900 dark:text-stone-100" size={Math.round(24 * scale)} />;
     actionLabel = t("topbar.createCounter");
   } else if (isCounterDetailPath) {
-    actionIcon = <Edit className="text-stone-900 dark:text-stone-100" size={24} />;
+    actionIcon = <Edit className="text-stone-900 dark:text-stone-100" size={Math.round(24 * scale)} />;
     actionLabel = t("topbar.editCounter");
   }
 
@@ -169,11 +169,6 @@ export function Topbar() {
       useNativeDriver: true,
     }).start();
   }, [isLoadingReport, isReportModalVisible, reportContentOpacity]);
-
-  const handleOpenNotifications = () => {
-    setIsNotificationsModalVisible(true);
-    setIsMenuOpen(false);
-  };
 
   const persistAudioSettings = ({ nextTapSoundVolume = tapSoundVolume, nextVibrationStrength = vibrationStrength } = {}) => {
     const normalizedSettings = {
@@ -231,8 +226,6 @@ export function Topbar() {
     } else {
       await cancelCounterReminder();
     }
-
-    setIsNotificationsModalVisible(false);
   };
 
   const handleGoHome = () => {
@@ -242,23 +235,33 @@ export function Topbar() {
 
   const handleToggleTheme = () => {
     setColorScheme(colorScheme === "dark" ? "light" : "dark");
-    setIsMenuOpen(false);
-  };
-
-  const handleChangeLanguage = () => {
-    setIsLanguageModalVisible(true);
-    setIsMenuOpen(false);
   };
 
   const handleToggleLayout = () => {
     const nextLayoutMode = layoutMode === GRID_LAYOUT_MODE ? DEFAULT_LAYOUT_MODE : GRID_LAYOUT_MODE;
     setLayoutMode(nextLayoutMode);
-    setIsMenuOpen(false);
+  };
+
+  const handleUiScaleChange = (index) => {
+    const normalized = normalizeUiScaleIndex(index);
+    setUiScaleIndex(normalized);
+    updateConfig({ field: UI_SCALE_CONFIG_FIELD, value: String(normalized) });
   };
 
   const handleSelectLanguage = (nextLanguage) => {
     setLanguage(nextLanguage);
-    setIsLanguageModalVisible(false);
+  };
+
+  const handleToggleNotifications = () => {
+    setNotificationsEnabled((current) => !current);
+  };
+
+  const handleAdjustNotificationHour = (delta) => {
+    setNotificationHour((current) => (current + delta + 24) % 24);
+  };
+
+  const handleAdjustNotificationMinute = (delta) => {
+    setNotificationMinute((current) => (current + delta + 60) % 60);
   };
 
   const handleShowReport = () => {
@@ -356,8 +359,8 @@ export function Topbar() {
           accessibilityLabel={t("topbar.openMenu")}
         >
           <MaterialCommunityIcons
-            name="dots-vertical"
-            size={22}
+            name="menu"
+            size={Math.round(22 * scale)}
             color={iconColor}
           />
         </Pressable>
@@ -370,6 +373,7 @@ export function Topbar() {
             <Text
               numberOfLines={1}
               className="text-3xl font-black tracking-tight text-center text-stone-900 dark:text-stone-100"
+              style={{ fontSize: Math.round(30 * scale) }}
             >
               {t("app.title")}
             </Text>
@@ -391,145 +395,46 @@ export function Topbar() {
         ) : null}
       </View>
 
-      <Modal
-        visible={isMenuOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => {
+      <SideMenuDrawer
+        isOpen={isMenuOpen}
+        onClose={() => {
           setIsMenuOpen(false);
         }}
-      >
-        <Pressable
-          onPress={() => {
-            setIsMenuOpen(false);
-          }}
-          className="flex-1"
-        >
-          <View className="flex-1" style={{ paddingTop: insets.top + 25, paddingLeft: 16 }}>
-            <Pressable
-              onPress={() => { }}
-              className="w-44 p-2 border rounded-2xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
-            >
-              <Pressable
-                onPress={handleGoHome}
-                className="flex-row items-center px-3 py-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-                accessibilityRole="button"
-                accessibilityLabel={t("topbar.home")}
-              >
-                <MaterialCommunityIcons name="home-outline" size={18} color={iconColor} />
-                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.home")}</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleToggleLayout}
-                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-                accessibilityRole="button"
-                accessibilityLabel={nextLayoutLabel}
-              >
-                <MaterialCommunityIcons
-                  name={layoutMode === GRID_LAYOUT_MODE ? "view-agenda-outline" : "view-grid-outline"}
-                  size={18}
-                  color={iconColor}
-                />
-                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{nextLayoutLabel}</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleToggleTheme}
-                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-                accessibilityRole="button"
-                accessibilityLabel={t("topbar.toggleTheme")}
-              >
-                <MaterialCommunityIcons name="theme-light-dark" size={18} color={iconColor} />
-                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.theme")}</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleOpenNotifications}
-                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-                accessibilityRole="button"
-                accessibilityLabel={t("notifications.menuLabel")}
-              >
-                <MaterialCommunityIcons name={notificationsEnabled ? "bell" : "bell-outline"} size={18} color={iconColor} />
-                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("notifications.menuLabel")}</Text>
-              </Pressable>
-
-              <View className="px-3 py-3 mt-2 rounded-2xl border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800" style={{ gap: 10 }}>
-                <Text className="text-xs font-black uppercase tracking-wide text-stone-500 dark:text-stone-400">
-                  {t("feedback.menuLabel")}
-                </Text>
-
-                <View style={{ gap: 4 }}>
-                  <Text className="text-sm font-bold text-stone-900 dark:text-stone-100">{t("feedback.soundVolume")}</Text>
-                  <Slider
-                    minimumValue={0}
-                    maximumValue={1}
-                    step={0.01}
-                    value={tapSoundVolume}
-                    onValueChange={handleTapSoundVolumeChange}
-                    onSlidingComplete={(value) => {
-                      persistAudioSettings({ nextTapSoundVolume: value });
-                    }}
-                    minimumTrackTintColor={colorScheme === "dark" ? "#f5f5f4" : "#1f2937"}
-                    maximumTrackTintColor={colorScheme === "dark" ? "#52525b" : "#d6d3d1"}
-                    thumbTintColor={colorScheme === "dark" ? "#f5f5f4" : "#111827"}
-                    accessibilityLabel={t("feedback.soundVolumeAccessibility")}
-                  />
-                </View>
-
-                <View style={{ gap: 4 }}>
-                  <Text className="text-sm font-bold text-stone-900 dark:text-stone-100">{t("feedback.vibrationStrength")}</Text>
-                  <Slider
-                    minimumValue={0}
-                    maximumValue={1}
-                    step={0.01}
-                    value={vibrationStrength}
-                    onValueChange={handleVibrationStrengthChange}
-                    onSlidingComplete={(value) => {
-                      persistAudioSettings({ nextVibrationStrength: value });
-                    }}
-                    minimumTrackTintColor={colorScheme === "dark" ? "#f5f5f4" : "#1f2937"}
-                    maximumTrackTintColor={colorScheme === "dark" ? "#52525b" : "#d6d3d1"}
-                    thumbTintColor={colorScheme === "dark" ? "#f5f5f4" : "#111827"}
-                    accessibilityLabel={t("feedback.vibrationStrengthAccessibility")}
-                  />
-                </View>
-              </View>
-
-              <Pressable
-                onPress={handleChangeLanguage}
-                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-                accessibilityRole="button"
-                accessibilityLabel={t("topbar.language")}
-              >
-                <MaterialCommunityIcons name="translate" size={18} color={iconColor} />
-                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.language")}</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleShowReport}
-                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-                accessibilityRole="button"
-                accessibilityLabel={t("topbar.report")}
-              >
-                <MaterialCommunityIcons name="file-chart-outline" size={18} color={iconColor} />
-                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.report")}</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={handleResetAll}
-                className="flex-row items-center px-3 py-2 mt-2 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-                accessibilityRole="button"
-                accessibilityLabel={t("topbar.resetAll")}
-              >
-                <MaterialCommunityIcons name="refresh" size={18} color={iconColor} />
-                <Text className="ml-2 text-sm font-bold text-stone-900 dark:text-stone-100">{t("topbar.resetAll")}</Text>
-              </Pressable>
-
-            </Pressable>
-          </View>
-        </Pressable>
-      </Modal>
+        insets={insets}
+        t={t}
+        colorScheme={colorScheme}
+        iconColor={iconColor}
+        language={language}
+        onGoHome={handleGoHome}
+        onToggleLayout={handleToggleLayout}
+        onToggleTheme={handleToggleTheme}
+        onToggleNotifications={handleToggleNotifications}
+        onAdjustNotificationHour={handleAdjustNotificationHour}
+        onAdjustNotificationMinute={handleAdjustNotificationMinute}
+        onSaveNotifications={() => {
+          void handleSaveNotifications();
+        }}
+        onTapSoundVolumeChange={handleTapSoundVolumeChange}
+        onTapSoundVolumeComplete={(value) => {
+          persistAudioSettings({ nextTapSoundVolume: value });
+        }}
+        onVibrationStrengthChange={handleVibrationStrengthChange}
+        onVibrationStrengthComplete={(value) => {
+          persistAudioSettings({ nextVibrationStrength: value });
+        }}
+        onSelectLanguage={handleSelectLanguage}
+        onShowReport={handleShowReport}
+        onResetAll={handleResetAll}
+        nextLayoutLabel={nextLayoutLabel}
+        layoutMode={layoutMode}
+        uiScaleIndex={uiScaleIndex}
+        onUiScaleChange={handleUiScaleChange}
+        notificationsEnabled={notificationsEnabled}
+        notificationHour={notificationHour}
+        notificationMinute={notificationMinute}
+        tapSoundVolume={tapSoundVolume}
+        vibrationStrength={vibrationStrength}
+      />
 
       <Modal
         visible={isReportModalVisible}
@@ -550,10 +455,10 @@ export function Topbar() {
             className="w-full max-w-md p-4 border rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
             style={{ maxHeight: Math.min(windowHeight * 0.84, 720) }}
           >
-            <Text className="text-xl font-black text-center text-stone-900 dark:text-stone-100">
+            <Text className="text-xl font-black text-center text-stone-900 dark:text-stone-100" style={{ fontSize: Math.round(20 * scale) }}>
               {t("report.title")}
             </Text>
-            <Text className="mt-1 mb-3 text-sm text-center text-stone-600 dark:text-stone-300">
+            <Text className="mt-1 mb-3 text-sm text-center text-stone-600 dark:text-stone-300" style={{ fontSize: Math.round(14 * scale) }}>
               {t("report.subtitle")}
             </Text>
 
@@ -567,7 +472,7 @@ export function Topbar() {
             >
               {isLoadingReport ? (
                 <View style={{ gap: 8 }}>
-                  <Text className="text-sm font-semibold text-center text-stone-600 dark:text-stone-300">
+                  <Text className="text-sm font-semibold text-center text-stone-600 dark:text-stone-300" style={{ fontSize: Math.round(14 * scale) }}>
                     {t("report.loading")}
                   </Text>
                   <View
@@ -605,16 +510,16 @@ export function Topbar() {
                             accessibilityLabel={isExpanded ? t("report.collapseYear", { year: group.year }) : t("report.expandYear", { year: group.year })}
                           >
                             <View className="flex-1 pr-2">
-                              <Text className="text-sm font-black text-stone-900 dark:text-stone-100">
+                              <Text className="text-sm font-black text-stone-900 dark:text-stone-100" style={{ fontSize: Math.round(14 * scale) }}>
                                 {group.year}
                               </Text>
-                              <Text className="mt-0.5 text-xs font-semibold text-stone-500 dark:text-stone-400">
+                              <Text className="mt-0.5 text-xs font-semibold text-stone-500 dark:text-stone-400" style={{ fontSize: Math.round(12 * scale) }}>
                                 {t("report.itemCount", { count: group.items.length })}
                               </Text>
                             </View>
                             <MaterialCommunityIcons
                               name={isExpanded ? "chevron-up" : "chevron-down"}
-                              size={20}
+                              size={Math.round(20 * scale)}
                               color={iconColor}
                             />
                           </Pressable>
@@ -627,7 +532,7 @@ export function Topbar() {
                             accessibilityRole="button"
                             accessibilityLabel={t("report.copyYear", { year: group.year })}
                           >
-                            <MaterialCommunityIcons name="content-copy" size={15} color={iconColor} />
+                            <MaterialCommunityIcons name="content-copy" size={Math.round(15 * scale)} color={iconColor} />
                           </Pressable>
                         </View>
 
@@ -638,10 +543,10 @@ export function Topbar() {
                                 key={`${group.year}-${item.counterId}`}
                                 className="flex-row items-center justify-between px-3 py-2 border rounded-xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900"
                               >
-                                <Text numberOfLines={1} className="flex-1 pr-2 text-sm font-semibold text-stone-700 dark:text-stone-200">
+                                <Text numberOfLines={1} className="flex-1 pr-2 text-sm font-semibold text-stone-700 dark:text-stone-200" style={{ fontSize: Math.round(14 * scale) }}>
                                   {item.counterTitle}
                                 </Text>
-                                <Text className="text-sm font-black text-stone-900 dark:text-stone-100">
+                                <Text className="text-sm font-black text-stone-900 dark:text-stone-100" style={{ fontSize: Math.round(14 * scale) }}>
                                   {t("report.itemValue", { value: item.value })}
                                 </Text>
                               </View>
@@ -655,7 +560,7 @@ export function Topbar() {
               ) : (
                 <Animated.View style={{ opacity: reportContentOpacity }}>
                   <View className="px-4 py-8 border rounded-2xl border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800">
-                    <Text className="text-sm font-semibold text-center text-stone-600 dark:text-stone-300">
+                    <Text className="text-sm font-semibold text-center text-stone-600 dark:text-stone-300" style={{ fontSize: Math.round(14 * scale) }}>
                       {t("report.empty")}
                     </Text>
                   </View>
@@ -673,7 +578,7 @@ export function Topbar() {
                 accessibilityRole="button"
                 accessibilityLabel={t("report.copyAll")}
               >
-                <Text className="text-sm font-extrabold text-center text-stone-900 dark:text-stone-100">
+                <Text className="text-sm font-extrabold text-center text-stone-900 dark:text-stone-100" style={{ fontSize: Math.round(14 * scale) }}>
                   {t("report.copyAll")}
                 </Text>
               </Pressable>
@@ -687,7 +592,7 @@ export function Topbar() {
                 accessibilityRole="button"
                 accessibilityLabel={t("report.savePdf")}
               >
-                <Text className="text-sm font-extrabold text-center text-stone-100 dark:text-stone-900">
+                <Text className="text-sm font-extrabold text-center text-stone-100 dark:text-stone-900" style={{ fontSize: Math.round(14 * scale) }}>
                   {t("report.savePdf")}
                 </Text>
               </Pressable>
@@ -696,215 +601,11 @@ export function Topbar() {
         </View>
       </Modal>
 
-      <Modal
-        visible={isNotificationsModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => {
-          setIsNotificationsModalVisible(false);
-        }}
-      >
-        <Pressable
-          onPress={() => {
-            setIsNotificationsModalVisible(false);
-          }}
-          className="items-center justify-center flex-1 px-6 bg-black/35"
-        >
-          <Pressable onPress={() => { }} className="w-full max-w-xs p-4 border rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
-            <Text className="text-xl font-black text-center text-stone-900 dark:text-stone-100">
-              {t("notifications.modalTitle")}
-            </Text>
-            <Text className="mt-1 mb-4 text-sm text-center text-stone-600 dark:text-stone-300">
-              {t("notifications.modalBody")}
-            </Text>
-
-            <Pressable
-              onPress={() => setNotificationsEnabled((v) => !v)}
-              className="flex-row items-center justify-between px-4 py-3 rounded-full border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-              accessibilityRole="switch"
-              accessibilityLabel={t("notifications.enable")}
-            >
-              <Text className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                {t("notifications.enable")}
-              </Text>
-              <View
-                style={[
-                  styles.toggleTrack,
-                  { backgroundColor: notificationsEnabled ? (colorScheme === "dark" ? "#f5f5f4" : "#1c1917") : "rgba(120,113,108,0.3)" },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.toggleThumb,
-                    {
-                      alignSelf: notificationsEnabled ? "flex-end" : "flex-start",
-                      backgroundColor: notificationsEnabled ? (colorScheme === "dark" ? "#1c1917" : "#f8fafc") : "#f8fafc",
-                    },
-                  ]}
-                />
-              </View>
-            </Pressable>
-
-            {notificationsEnabled ? (
-              <View className="mt-3 px-4 py-3 rounded-2xl border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800">
-                <Text className="text-xs font-bold text-center text-stone-500 dark:text-stone-400" style={{ marginBottom: 12 }}>
-                  {t("notifications.time")}
-                </Text>
-                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                  <View style={{ alignItems: "center", gap: 8 }}>
-                    <Pressable
-                      onPress={() => setNotificationHour((h) => (h + 1) % 24)}
-                      accessibilityRole="button"
-                    >
-                      <MaterialCommunityIcons name="chevron-up" size={28} color={iconColor} />
-                    </Pressable>
-                    <Text className="text-2xl font-black text-stone-900 dark:text-stone-100" style={{ minWidth: 48, textAlign: "center" }}>
-                      {String(notificationHour).padStart(2, "0")}
-                    </Text>
-                    <Pressable
-                      onPress={() => setNotificationHour((h) => (h - 1 + 24) % 24)}
-                      accessibilityRole="button"
-                    >
-                      <MaterialCommunityIcons name="chevron-down" size={28} color={iconColor} />
-                    </Pressable>
-                  </View>
-                  <Text className="text-2xl font-black text-stone-900 dark:text-stone-100">:</Text>
-                  <View style={{ alignItems: "center", gap: 8 }}>
-                    <Pressable
-                      onPress={() => setNotificationMinute((m) => (m + 1) % 60)}
-                      accessibilityRole="button"
-                    >
-                      <MaterialCommunityIcons name="chevron-up" size={28} color={iconColor} />
-                    </Pressable>
-                    <Text className="text-2xl font-black text-stone-900 dark:text-stone-100" style={{ minWidth: 48, textAlign: "center" }}>
-                      {String(notificationMinute).padStart(2, "0")}
-                    </Text>
-                    <Pressable
-                      onPress={() => setNotificationMinute((m) => (m - 1 + 60) % 60)}
-                      accessibilityRole="button"
-                    >
-                      <MaterialCommunityIcons name="chevron-down" size={28} color={iconColor} />
-                    </Pressable>
-                  </View>
-                </View>
-              </View>
-            ) : null}
-
-            <Pressable
-              onPress={() => {
-                void handleSaveNotifications();
-              }}
-              className="px-4 py-3 mt-3 rounded-full bg-stone-900 dark:bg-stone-100"
-              accessibilityRole="button"
-              accessibilityLabel={t("notifications.save")}
-            >
-              <Text className="text-sm font-extrabold text-center text-stone-100 dark:text-stone-900">
-                {t("notifications.save")}
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => {
-                setIsNotificationsModalVisible(false);
-              }}
-              className="px-4 py-3 mt-2 rounded-full border border-stone-300 dark:border-stone-700"
-              accessibilityRole="button"
-              accessibilityLabel={t("form.cancel")}
-            >
-              <Text className="text-sm font-extrabold text-center text-stone-900 dark:text-stone-100">
-                {t("form.cancel")}
-              </Text>
-            </Pressable>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      <Modal
-        visible={isLanguageModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => {
-          setIsLanguageModalVisible(false);
-        }}
-      >
-        <Pressable
-          onPress={() => {
-            setIsLanguageModalVisible(false);
-          }}
-          className="items-center justify-center flex-1 px-6 bg-black/35"
-        >
-          <Pressable onPress={() => { }} className="w-full max-w-xs p-4 border rounded-3xl border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
-            <Text className="text-xl font-black text-center text-stone-900 dark:text-stone-100">
-              {t("topbar.languageMenuTitle")}
-            </Text>
-            <Text className="mt-1 mb-3 text-sm text-center text-stone-600 dark:text-stone-300">
-              {t("topbar.languageMenuBody")}
-            </Text>
-
-            <View style={{ gap: 8 }}>
-              {SUPPORTED_LANGUAGES.map((code) => {
-                const isSelectedLanguage = code === language;
-
-                return (
-                  <Pressable
-                    key={code}
-                    onPress={() => {
-                      handleSelectLanguage(code);
-                    }}
-                    className={`flex-row items-center justify-between px-4 py-3 rounded-full border ${isSelectedLanguage
-                      ? "border-stone-900 dark:border-stone-100 bg-stone-900 dark:bg-stone-100"
-                      : "border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800"
-                      }`}
-                    accessibilityRole="button"
-                    accessibilityLabel={t("topbar.selectLanguage", { language: t(`languages.${code}`) })}
-                  >
-                    <Text className={`text-sm font-extrabold ${isSelectedLanguage ? "text-stone-100 dark:text-stone-900" : "text-stone-900 dark:text-stone-100"}`}>
-                      {t(`languages.${code}`)}
-                    </Text>
-                    {isSelectedLanguage ? (
-                      <MaterialCommunityIcons
-                        name="check"
-                        size={18}
-                        color={isSelectedLanguage ? (colorScheme === "dark" ? "#111827" : "#f8fafc") : iconColor}
-                      />
-                    ) : null}
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            <Pressable
-              onPress={() => {
-                setIsLanguageModalVisible(false);
-              }}
-              className="px-4 py-3 mt-3 rounded-full border border-stone-300 dark:border-stone-700"
-              accessibilityRole="button"
-              accessibilityLabel={t("form.cancel")}
-            >
-              <Text className="text-sm font-extrabold text-center text-stone-900 dark:text-stone-100">
-                {t("form.cancel")}
-              </Text>
-            </Pressable>
-          </Pressable>
-        </Pressable>
-      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  toggleTrack: {
-    width: 44,
-    height: 26,
-    borderRadius: 13,
-    padding: 2,
-    justifyContent: "center",
-  },
-  toggleThumb: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-  },
   reportBackdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.35)",

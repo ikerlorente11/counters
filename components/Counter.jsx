@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { View, StyleSheet, Text, Pressable, Animated } from "react-native";
 import { Link } from "expo-router";
 import { updateCounterValue } from "../lib/db/database";
@@ -9,6 +9,8 @@ import {
 import { useI18n } from "../lib/i18n";
 import { Plus, Minus } from "./Icons";
 import Color from "color";
+import { useCounter } from "../lib/counterContext";
+import { UI_SCALE_OPTIONS } from "../lib/uiScale";
 
 /**
  * Builds safe accent and card colors even when persisted values are malformed.
@@ -37,6 +39,14 @@ function getSafeCardPalette(backgroundColor) {
  */
 export function Counter({ counter }) {
   const { t } = useI18n();
+  const { uiScaleIndex } = useCounter();
+  const scale = UI_SCALE_OPTIONS[uiScaleIndex] ?? 1;
+  const scaledStyles = useMemo(() => ({
+    counter: { minHeight: 106 * scale },
+    title: { fontSize: 16 * scale },
+    value: { fontSize: 38 * scale, lineHeight: 42 * scale },
+    button: { width: 54 * scale, height: 88 * scale },
+  }), [scale]);
   const [counterValue, setCounterValue] = useState(
     Number.parseInt(counter.value, 10) || 0,
   );
@@ -87,6 +97,7 @@ export function Counter({ counter }) {
     <Animated.View
       style={[
         styles.counter,
+        scaledStyles.counter,
         {
           borderColor: accentColor,
           backgroundColor: cardColor,
@@ -101,6 +112,7 @@ export function Counter({ counter }) {
         onPress={handleDecrement}
         style={({ pressed }) => [
           styles.button,
+          scaledStyles.button,
           pressed ? styles.buttonPressed : null,
           { backgroundColor: accentColor },
         ]}
@@ -113,12 +125,12 @@ export function Counter({ counter }) {
         <Link href={`/counter/${counter.id}`} asChild>
           <Pressable style={styles.data}>
             <Text
-              style={[styles.title, { color: counter.color }]}
+              style={[styles.title, scaledStyles.title, { color: counter.color }]}
               numberOfLines={1}
               ellipsizeMode="tail">
               {counter.title}
             </Text>
-            <Text style={[styles.value, { color: counter.color }]}>
+            <Text style={[styles.value, scaledStyles.value, { color: counter.color }]}>
               {counterValue}
             </Text>
           </Pressable>
@@ -129,6 +141,7 @@ export function Counter({ counter }) {
         onPress={handleIncrement}
         style={({ pressed }) => [
           styles.button,
+          scaledStyles.button,
           pressed ? styles.buttonPressed : null,
           { backgroundColor: accentColor },
         ]}
