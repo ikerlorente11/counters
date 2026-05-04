@@ -8,6 +8,8 @@
 - Expo Print + Expo Sharing for annual report export
 - Expo Clipboard for report copy actions
 - Expo Notifications for daily counter reminders (development build only)
+- expo-audio for counter tap sound playback
+- @react-native-community/slider for volume, vibration, and UI scale controls
 
 ## App flow
 
@@ -16,7 +18,8 @@
 - The home screen supports persisted list/grid layouts and direct drag-and-drop reordering.
 - The detail screen shows historical values and chart for one counter.
 - The edit route reuses a single form for create and update flows.
-- The topbar provides report, language, layout, and theme actions.
+- The topbar provides a hamburger button that opens the side menu drawer.
+- The side menu drawer consolidates all global settings: layout, theme, language, notifications, tap feedback, UI scale, report, and reset.
 
 ## Main modules
 
@@ -24,11 +27,14 @@
 - app/index.js: counters list and sound lifecycle.
 - app/counter/[id].js: history list + chart.
 - app/counter/edit/[id].js: create/edit wrapper for the form.
-- components/Topbar.jsx: topbar menu, annual report modal, export actions, language and theme controls.
+- components/Topbar.jsx: topbar bar, annual report modal, export actions, and side menu wiring.
+- components/SideMenuDrawer.jsx: slide-in drawer with all global app settings (layout, theme, language, notifications, tap feedback, UI scale, report, reset).
 - lib/db/database.js: persistence API, transactions, archive support, display order persistence, and development preview synchronization.
 - components/form/Form.jsx: create/update/delete actions and validation messaging.
 - components/DraggableCounter.jsx: long-press drag and drop interactions for home cards.
 - lib/counterValidation.js: shared payload validation and normalization.
+- lib/counterFeedback.js: tap sound and vibration feedback, audio player pool, configurable volume and strength.
+- lib/uiScale.js: UI scale constants (xs–xl multipliers), normalization, and persisted config field.
 - lib/reporting.js: annual report grouping and text helpers.
 - lib/developmentPreview.js: representative development-only screenshot dataset.
 

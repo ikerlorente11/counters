@@ -18,6 +18,8 @@
 14. Users can undo a same-day reset to restore counter values from the topbar menu.
 15. Users can navigate to the home screen by tapping the app title or the Home item in the topbar menu.
 16. Users can schedule a daily reminder notification to update their counters (requires a development build).
+17. Users can adjust tap sound volume and vibration strength for counter +/- button feedback from the side menu.
+18. Users can change the UI element scale (text and counter card size) across five steps (xs, sm, md, lg, xl) from the accessibility section of the side menu.
 
 ## Validation and input rules
 
@@ -33,6 +35,13 @@
 4. Success toasts include title and confirmation message (green color).
 5. Info toasts provide informational feedback (blue color).
 6. Toasts can be manually dismissed by tapping the close button.
+
+## Feedback behavior
+
+1. Counter +/- buttons play a short tap sound and trigger a light vibration when feedback settings are non-zero.
+2. Tap sound volume (0–1) and vibration strength (0–1) are persisted in config and applied immediately on change.
+3. Sound and vibration can be individually disabled by setting their value to 0.
+4. Audio playback uses a small player pool to avoid overlap on rapid taps.
 
 ## Persistence behavior
 
@@ -62,9 +71,11 @@
 9. Annual report opens in a modal with immediate loading feedback.
 10. Annual report content scrolls inside the modal without overflowing the screen.
 11. Annual report year sections are collapsed by default and expand on tap.
-12. Topbar menu order: Home, Grid, Theme, Language, Report, Reset all, Undo reset.
+12. The side menu drawer slides in from the left and contains: Home, Grid, Theme, Report (compact buttons), Language selector, Notifications, Feedback (sound/vibration sliders), Accessibility (UI scale slider), and a floating Reset counters button.
 13. Reset icon appears in the top-right corner of the edit form, aligned with the title and subtitle.
 14. Status bar text color adapts to light and dark theme across all screens.
+15. UI scale persists and applies to counter card height, title/value font sizes, topbar icons, and report modal text.
+16. Counter +/- buttons show a native press visual (opacity + scale) replacing the previous shared press state.
 
 ## Quality gates
 

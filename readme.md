@@ -54,10 +54,12 @@ This project intentionally keeps exactly three top-level documentation files:
 ## Release notes 1.1.2
 
 - Added counter reset: reset a single counter to 0 from the edit form (icon in top-right corner) without losing its history.
-- Added reset all: reset all counters to 0 at once from the topbar menu without losing history.
+- Added reset all: reset all counters to 0 at once from the side menu without losing history.
 - Added undo reset: recover counter values after a same-day reset from the topbar menu.
 - Added home navigation: tap the app title or the Home menu item to return to the home screen from any screen.
-- Reordered topbar menu: Grid, Theme, Language, Report, Reset all, Undo reset.
+- Replaced topbar dropdown menu with a slide-in side menu drawer containing all app settings.
+- Added tap sound and vibration feedback on counter +/- buttons, with adjustable volume and strength from the side menu.
+- Added UI scale (accessibility): choose counter card and text size across five steps (xs–xl) from the side menu.
 - Fixed status bar text color adapting to light and dark theme across all screens.
 - Fixed app loading in Expo Go after expo-notifications compatibility changes for SDK 53+.
 
@@ -67,6 +69,9 @@ This project intentionally keeps exactly three top-level documentation files:
 
 ## Recent updates
 
+- Added slide-in side menu drawer replacing the topbar dropdown, with all app settings in one place.
+- Added tap sound and vibration feedback with per-counter configurable volume and strength.
+- Added UI scale accessibility setting (xs–xl) persisted across sessions.
 - Added counter reset (single and all) with history preservation and same-day undo.
 - Added home navigation shortcut via app title tap and topbar menu item.
 - Fixed status bar theme adaptation and Expo Go startup compatibility.
