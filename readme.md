@@ -1,6 +1,6 @@
 # Counters
 
-Current release target: 1.1.2
+Current release target: 1.1.3
 
 ## Documentation
 
@@ -29,7 +29,7 @@ This project intentionally keeps exactly three top-level documentation files:
 ## Build
 
 - Preview build: `eas build -p android --profile preview`
-- Production Android bundle: `npx eas-cli@latest build --platform android --profile production --non-interactive --message "Release 1.1.2 - Patch update"`
+- Production Android bundle: `npx eas-cli@latest build --platform android --profile production --non-interactive --message "Release 1.1.3 - Visual update"`
 - Local: `npx expo prebuild --platform android --clean`
 `npx expo run:android`
 
@@ -37,19 +37,26 @@ This project intentionally keeps exactly three top-level documentation files:
 ## Release readiness
 
 - Version metadata:
-	- `package.json`: `1.1.2`
-	- `app.json` Expo version: `1.1.2`
-	- `app.json` Android `versionCode`: `10`
+	- `package.json`: `1.1.3`
+	- `app.json` Expo version: `1.1.3`
+	- `app.json` Android `versionCode`: `11`
 - Local validation before release:
 	- `npm run lint`
 	- `npm run test`
 	- `npx expo-doctor`
 - Play Store submission:
-	- Build and auto-submit: `npx eas-cli@latest build --platform android --profile production --auto-submit --non-interactive --message "Release 1.1.2 - Patch update"`
+	- Build and auto-submit: `npx eas-cli@latest build --platform android --profile production --auto-submit --non-interactive --message "Release 1.1.3 - Visual update"`
 	- Manual submit if needed: `npx eas-cli@latest submit --platform android --profile production`
 - Deobfuscation support:
 	- Production builds keep `android/app/build/outputs/mapping/release/mapping.txt` as an EAS build artifact for Play Console crash/ANR deobfuscation uploads.
 - Current EAS submit profile targets the Play internal track first.
+
+## Release notes 1.1.3
+
+- Applied volumetric visual design to counter cards: vertical light-to-dark gradient gives each card a physical raised appearance.
+- Applied matching volumetric gradient to increment and decrement buttons inside each card.
+- Added `applicationIdSuffix ".dev"` to debug builds so dev and Play Store builds can coexist on the same device.
+- Fixed side menu drawer top padding on standalone dev builds where the status bar previously overlapped the menu header.
 
 ## Release notes 1.1.2
 

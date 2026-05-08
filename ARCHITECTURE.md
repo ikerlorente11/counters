@@ -5,6 +5,7 @@
 - Expo Router + React Native
 - SQLite via expo-sqlite (local persistent storage)
 - NativeWind for styling and theme support
+- expo-linear-gradient for volumetric card and button gradients
 - Expo Print + Expo Sharing for annual report export
 - Expo Clipboard for report copy actions
 - Expo Notifications for daily counter reminders (development build only)
@@ -31,7 +32,8 @@
 - components/SideMenuDrawer.jsx: slide-in drawer with all global app settings (layout, theme, language, notifications, tap feedback, UI scale, report, reset).
 - lib/db/database.js: persistence API, transactions, archive support, display order persistence, and development preview synchronization.
 - components/form/Form.jsx: create/update/delete actions and validation messaging.
-- components/DraggableCounter.jsx: long-press drag and drop interactions for home cards.
+- components/DraggableCounter.jsx: long-press drag and drop interactions for home cards, volumetric gradient rendering.
+- components/Counter.jsx: static counter card with volumetric gradient rendering.
 - lib/counterValidation.js: shared payload validation and normalization.
 - lib/counterFeedback.js: tap sound and vibration feedback, audio player pool, configurable volume and strength.
 - lib/uiScale.js: UI scale constants (xs–xl multipliers), normalization, and persisted config field.
