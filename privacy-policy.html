@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,12 +13,16 @@
             padding: 0;
             background-color: #f4f4f4;
         }
-        h1, h2 {
+
+        h1,
+        h2 {
             color: #333;
         }
+
         h1 {
             text-align: center;
         }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -28,51 +33,109 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Política de Privacidad</h1>
+        <p><em>Última actualización: 8 de mayo de 2026</em></p>
 
         <h2>1. Introducción</h2>
         <p>
-            Esta Política de Privacidad describe cómo maneja y protege la información que se recopila y almacena en la aplicación <strong>[Nombre de la Aplicación]</strong> ("la Aplicación"). La privacidad de nuestros usuarios es de suma importancia, y nos comprometemos a proteger cualquier información que se recopile a través del uso de la Aplicación.
+            Esta Política de Privacidad describe cómo maneja y protege la información que se recopila y almacena en la
+            aplicación <strong>Counters</strong> (<code>com.ikerlorente11.counters</code>, "la Aplicación"). La
+            privacidad de nuestros usuarios es de suma importancia, y nos comprometemos a proteger cualquier información
+            generada a través del uso de la Aplicación.
         </p>
 
         <h2>2. Información Recopilada</h2>
-        <h3>2.1. Información Personal:</h3>
+        <h3>2.1. Información Personal</h3>
         <p>
-            La Aplicación no recopila, solicita ni almacena ninguna información personal identificable del usuario, como nombres, direcciones de correo electrónico, números de teléfono, o cualquier otro dato que pueda identificar al usuario.
+            La Aplicación no recopila, solicita ni almacena ninguna información personal identificable del usuario, como
+            nombres, direcciones de correo electrónico, números de teléfono o cualquier otro dato que pueda identificar
+            al usuario.
         </p>
 
-        <h3>2.2. Configuración del Tema:</h3>
+        <h3>2.2. Datos de Contadores</h3>
         <p>
-            La única información que se recopila es la preferencia del usuario en cuanto al tema de la aplicación (p. ej., tema oscuro o claro). Esta configuración se almacena localmente en el dispositivo del usuario para personalizar la experiencia de uso.
+            La Aplicación almacena localmente los contadores creados por el usuario. Cada contador puede incluir:
         </p>
+        <ul>
+            <li>Nombre del contador</li>
+            <li>Valor numérico actual</li>
+            <li>Color del texto y color de fondo</li>
+            <li>Estado de archivo (activo o archivado)</li>
+            <li>Historial diario de valores (puntos de datos por día)</li>
+            <li>Orden de visualización en la lista</li>
+        </ul>
+
+        <h3>2.3. Configuración y Preferencias</h3>
+        <p>
+            La Aplicación persiste localmente las siguientes preferencias del usuario:
+        </p>
+        <ul>
+            <li>Tema visual (oscuro o claro)</li>
+            <li>Modo de vista de la pantalla principal (lista o cuadrícula de dos columnas)</li>
+            <li>Escala de interfaz (tamaño de texto y tarjetas: xs, sm, md, lg, xl)</li>
+            <li>Volumen del sonido de tap y nivel de vibración para el feedback de los botones +/−</li>
+            <li>Programación de notificaciones de recordatorio diario (hora y minuto)</li>
+        </ul>
 
         <h2>3. Almacenamiento de Datos</h2>
-        <h3>3.1. Base de Datos Local:</h3>
+        <h3>3.1. Base de Datos Local</h3>
         <p>
-            Todos los datos generados por la Aplicación, incluidos los datos de configuración del tema y los datos de contadores, se almacenan en una base de datos SQLite local en el dispositivo del usuario. Estos datos no se transmiten, comparten ni almacenan en servidores externos.
+            Todos los datos generados por la Aplicación se almacenan en una base de datos <strong>SQLite local</strong>
+            en el dispositivo del usuario. Estos datos no se transmiten, comparten ni almacenan en servidores externos.
+            La Aplicación no utiliza ningún servicio de análisis, publicidad ni rastreo de terceros.
         </p>
 
-        <h2>4. Uso de la Información</h2>
+        <h2>4. Permisos Utilizados</h2>
+        <h3>4.1. Notificaciones</h3>
         <p>
-            La información almacenada se utiliza exclusivamente para mejorar la experiencia de usuario dentro de la Aplicación. La configuración del tema se utiliza para aplicar la preferencia seleccionada por el usuario durante el uso de la Aplicación.
+            Si el usuario activa los recordatorios diarios, la Aplicación solicita permiso para enviar notificaciones
+            locales. Las notificaciones son generadas y gestionadas íntegramente en el dispositivo. No se envía ningún
+            dato a servidores externos para este fin. El usuario puede cancelar este permiso desde los ajustes del
+            sistema en cualquier momento.
+        </p>
+        <h3>4.2. Vibración</h3>
+        <p>
+            La Aplicación puede activar la vibración del dispositivo como respuesta táctil al pulsar los botones +/− de
+            los contadores. Este permiso no implica acceso a datos del usuario.
         </p>
 
-        <h2>5. Seguridad</h2>
+        <h2>5. Uso de la Información</h2>
         <p>
-            Tomamos medidas razonables para proteger la información almacenada en la Aplicación. Sin embargo, debido a la naturaleza de la tecnología, no podemos garantizar la seguridad absoluta de los datos almacenados en el dispositivo.
+            Los datos almacenados se utilizan exclusivamente para ofrecer la funcionalidad de la Aplicación al propio
+            usuario en su dispositivo:
+        </p>
+        <ul>
+            <li>Mostrar, crear, editar y archivar contadores.</li>
+            <li>Registrar y visualizar el historial diario de valores y gráficas de tendencia.</li>
+            <li>Generar informes anuales con los valores máximos de cada contador.</li>
+            <li>Aplicar las preferencias de tema, escala y feedback seleccionadas por el usuario.</li>
+            <li>Programar y gestionar notificaciones de recordatorio locales.</li>
+        </ul>
+
+        <h2>6. Seguridad</h2>
+        <p>
+            Todos los datos residen en el dispositivo del usuario y no son accesibles desde el exterior. Tomamos medidas
+            razonables para proteger la información almacenada, aunque, debido a la naturaleza de la tecnología, no
+            podemos garantizar la seguridad absoluta de los datos en el dispositivo.
         </p>
 
-        <h2>6. Cambios en esta Política de Privacidad</h2>
+        <h2>7. Cambios en esta Política de Privacidad</h2>
         <p>
-            Nos reservamos el derecho de actualizar o modificar esta Política de Privacidad en cualquier momento. Cualquier cambio en esta política se reflejará en una nueva versión de esta Política de Privacidad, que estará disponible en la Aplicación. El uso continuo de la Aplicación después de cualquier modificación constituye su aceptación de la Política de Privacidad revisada.
+            Nos reservamos el derecho de actualizar o modificar esta Política de Privacidad en cualquier momento.
+            Cualquier cambio se reflejará en una nueva versión de esta política, disponible en la Aplicación. El uso
+            continuo de la Aplicación tras cualquier modificación constituye la aceptación de la Política de Privacidad
+            revisada.
         </p>
 
-        <h2>7. Contacto</h2>
+        <h2>8. Contacto</h2>
         <p>
-            Si tienes alguna pregunta o inquietud sobre esta Política de Privacidad, por favor contacta con nosotros en <strong>[Correo Electrónico de Contacto]</strong>.
+            Si tienes alguna pregunta o inquietud sobre esta Política de Privacidad, por favor contacta con nosotros en
+            <strong>ikerlorentecalvo@gmail.com</strong>.
         </p>
     </div>
 </body>
+
 </html>
