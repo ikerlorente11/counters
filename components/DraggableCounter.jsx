@@ -219,108 +219,108 @@ export function DraggableCounter({
                         { borderColor: borderColor },
                     ]}
                 >
-                {isGridLayout ? null : (
-                    <Pressable
-                        onPressIn={handleTapFeedback}
-                        onPress={handleDecrement}
-                        style={({ pressed }) => [
-                            styles.button,
-                            scaledStyles.button,
-                            pressed ? styles.buttonPressed : null,
-                        ]}
-                        accessibilityRole="button"
-                        accessibilityLabel={t("counter.decrement", { title: counter.title })}
-                    >
-                        <LinearGradient
-                            colors={buttonGradientColors}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 0, y: 1 }}
-                            style={styles.buttonGradientFill}
-                        />
-                        <Minus color={counter.color} size={22} />
-                    </Pressable>
-                )}
-
-                <View style={isGridLayout ? styles.dataGridShell : styles.dataShell}>
-                    <Link href={`/counter/${counter.id}`} asChild>
-                        <Pressable style={[styles.data, isGridLayout ? styles.dataGrid : null]}>
-                            <Text
-                                style={[styles.title, scaledStyles.title, isGridLayout ? scaledStyles.titleGrid : null, { color: counter.color }]}
-                                numberOfLines={isGridLayout ? 2 : 1}
-                                ellipsizeMode="tail"
-                            >
-                                {counter.title}
-                            </Text>
-                            <Text style={[styles.value, scaledStyles.value, isGridLayout ? scaledStyles.valueGrid : null, { color: counter.color }]}>
-                                {counterValue}
-                            </Text>
+                    {isGridLayout ? null : (
+                        <Pressable
+                            onPressIn={handleTapFeedback}
+                            onPress={handleDecrement}
+                            style={({ pressed }) => [
+                                styles.button,
+                                scaledStyles.button,
+                                pressed ? styles.buttonPressed : null,
+                            ]}
+                            accessibilityRole="button"
+                            accessibilityLabel={t("counter.decrement", { title: counter.title })}
+                        >
+                            <LinearGradient
+                                colors={buttonGradientColors}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 0, y: 1 }}
+                                style={styles.buttonGradientFill}
+                            />
+                            <Minus color={counter.color} size={22} />
                         </Pressable>
-                    </Link>
-                    {isGridLayout ? (
-                        <View style={styles.buttonRowGrid}>
-                            <Pressable
-                                onPressIn={handleTapFeedback}
-                                onPress={handleDecrement}
-                                style={({ pressed }) => [
-                                    styles.button,
-                                    styles.buttonGridHalf,
-                                    pressed ? styles.buttonPressed : null,
-                                ]}
-                                accessibilityRole="button"
-                                accessibilityLabel={t("counter.decrement", { title: counter.title })}
-                            >
-                                <LinearGradient
-                                    colors={buttonGradientColors}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 0, y: 1 }}
-                                    style={styles.buttonGradientFillGrid}
-                                />
-                                <Minus color={counter.color} size={22} />
-                            </Pressable>
-                            <Pressable
-                                onPressIn={handleTapFeedback}
-                                onPress={handleIncrement}
-                                style={({ pressed }) => [
-                                    styles.button,
-                                    styles.buttonGridHalf,
-                                    pressed ? styles.buttonPressed : null,
-                                ]}
-                                accessibilityRole="button"
-                                accessibilityLabel={t("counter.increment", { title: counter.title })}
-                            >
-                                <LinearGradient
-                                    colors={buttonGradientColors}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 0, y: 1 }}
-                                    style={styles.buttonGradientFillGrid}
-                                />
-                                <Plus color={counter.color} size={22} />
-                            </Pressable>
-                        </View>
-                    ) : null}
-                </View>
+                    )}
 
-                {isGridLayout ? null : (
-                    <Pressable
-                        onPressIn={handleTapFeedback}
-                        onPress={handleIncrement}
-                        style={({ pressed }) => [
-                            styles.button,
-                            scaledStyles.button,
-                            pressed ? styles.buttonPressed : null,
-                        ]}
-                        accessibilityRole="button"
-                        accessibilityLabel={t("counter.increment", { title: counter.title })}
-                    >
-                        <LinearGradient
-                            colors={buttonGradientColors}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 0, y: 1 }}
-                            style={styles.buttonGradientFill}
-                        />
-                        <Plus color={counter.color} size={22} />
-                    </Pressable>
-                )}
+                    <View style={isGridLayout ? styles.dataGridShell : styles.dataShell}>
+                        <Link href={`/counter/${counter.id}`} asChild>
+                            <Pressable style={[styles.data, isGridLayout ? styles.dataGrid : null]}>
+                                <Text
+                                    style={[styles.title, scaledStyles.title, isGridLayout ? scaledStyles.titleGrid : null, { color: counter.color }]}
+                                    numberOfLines={isGridLayout ? 2 : 1}
+                                    ellipsizeMode="tail"
+                                >
+                                    {counter.title}
+                                </Text>
+                                <Text style={[styles.value, scaledStyles.value, isGridLayout ? scaledStyles.valueGrid : null, { color: counter.color }]}>
+                                    {counterValue}
+                                </Text>
+                            </Pressable>
+                        </Link>
+                        {isGridLayout ? (
+                            <View style={styles.buttonRowGrid}>
+                                <Pressable
+                                    onPressIn={handleTapFeedback}
+                                    onPress={handleDecrement}
+                                    style={({ pressed }) => [
+                                        styles.button,
+                                        styles.buttonGridHalf,
+                                        pressed ? styles.buttonPressed : null,
+                                    ]}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={t("counter.decrement", { title: counter.title })}
+                                >
+                                    <LinearGradient
+                                        colors={buttonGradientColors}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 0, y: 1 }}
+                                        style={styles.buttonGradientFillGrid}
+                                    />
+                                    <Minus color={counter.color} size={22} />
+                                </Pressable>
+                                <Pressable
+                                    onPressIn={handleTapFeedback}
+                                    onPress={handleIncrement}
+                                    style={({ pressed }) => [
+                                        styles.button,
+                                        styles.buttonGridHalf,
+                                        pressed ? styles.buttonPressed : null,
+                                    ]}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={t("counter.increment", { title: counter.title })}
+                                >
+                                    <LinearGradient
+                                        colors={buttonGradientColors}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 0, y: 1 }}
+                                        style={styles.buttonGradientFillGrid}
+                                    />
+                                    <Plus color={counter.color} size={22} />
+                                </Pressable>
+                            </View>
+                        ) : null}
+                    </View>
+
+                    {isGridLayout ? null : (
+                        <Pressable
+                            onPressIn={handleTapFeedback}
+                            onPress={handleIncrement}
+                            style={({ pressed }) => [
+                                styles.button,
+                                scaledStyles.button,
+                                pressed ? styles.buttonPressed : null,
+                            ]}
+                            accessibilityRole="button"
+                            accessibilityLabel={t("counter.increment", { title: counter.title })}
+                        >
+                            <LinearGradient
+                                colors={buttonGradientColors}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 0, y: 1 }}
+                                style={styles.buttonGradientFill}
+                            />
+                            <Plus color={counter.color} size={22} />
+                        </Pressable>
+                    )}
                 </LinearGradient>
             </Animated.View>
         </GestureDetector>
