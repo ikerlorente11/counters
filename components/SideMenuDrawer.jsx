@@ -138,7 +138,7 @@ export function SideMenuDrawer(props) {
                         {
                             width: drawerWidth,
                             transform: [{ translateX: drawerOffset }],
-                            paddingTop: 10,
+                            paddingTop: Math.max(insets.top, 10),
                             paddingBottom: Math.max(insets.bottom, 10),
                         },
                     ]}

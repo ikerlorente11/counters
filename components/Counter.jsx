@@ -9,6 +9,7 @@ import {
 import { useI18n } from "../lib/i18n";
 import { Plus, Minus } from "./Icons";
 import Color from "color";
+import { LinearGradient } from "expo-linear-gradient";
 import { useCounter } from "../lib/counterContext";
 import { UI_SCALE_OPTIONS } from "../lib/uiScale";
 
@@ -20,14 +21,37 @@ import { UI_SCALE_OPTIONS } from "../lib/uiScale";
 function getSafeCardPalette(backgroundColor) {
   try {
     const base = Color(backgroundColor || "#111827");
+    const card = base.desaturate(0.6).lighten(0.4);
+    const cardL = card.lightness();
+    const accent = base.desaturate(0.3);
+    const accentL = accent.lightness();
+    const isDark = card.isDark();
     return {
-      accentColor: base.desaturate(0.3).hex(),
-      cardColor: base.desaturate(0.7).lighten(0.4).hex(),
+      accentColor: accent.hex(),
+      gradientColors: [
+        card.lightness(Math.min(cardL + 22, 94)).hex(),
+        card.hex(),
+        card.lightness(Math.max(cardL - 14, 2)).hex(),
+      ],
+      buttonGradientColors: [
+        accent.lightness(Math.min(accentL + 18, 85)).hex(),
+        accent.hex(),
+        accent.lightness(Math.max(accentL - 14, 3)).hex(),
+      ],
+      borderColor: isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.10)",
+      shadowColor: isDark
+        ? base.lightness(55).saturate(0.3).hex()
+        : "#000000",
+      shadowOpacity: isDark ? 0.65 : 0.22,
     };
   } catch {
     return {
       accentColor: "#1f2937",
-      cardColor: "#374151",
+      gradientColors: ["#4b5563", "#374151", "#1a2233"],
+      buttonGradientColors: ["#4b5563", "#374151", "#1a2233"],
+      borderColor: "rgba(255,255,255,0.12)",
+      shadowColor: "#000000",
+      shadowOpacity: 0.25,
     };
   }
 }
@@ -52,7 +76,7 @@ export function Counter({ counter }) {
   );
   const entranceOpacity = useRef(new Animated.Value(0)).current;
   const entranceTranslate = useRef(new Animated.Value(10)).current;
-  const { accentColor, cardColor } = getSafeCardPalette(counter.backgroundColor);
+  const { accentColor, gradientColors, buttonGradientColors, borderColor, shadowColor, shadowOpacity } = getSafeCardPalette(counter.backgroundColor);
 
   useEffect(() => {
     Animated.parallel([
@@ -96,73 +120,97 @@ export function Counter({ counter }) {
   return (
     <Animated.View
       style={[
-        styles.counter,
-        scaledStyles.counter,
+        styles.counterShadow,
         {
-          borderColor: accentColor,
-          backgroundColor: cardColor,
+          backgroundColor: gradientColors[1],
+          shadowColor: shadowColor,
+          shadowOffset: { width: 0, height: 9 },
+          shadowOpacity: shadowOpacity,
+          shadowRadius: 18,
+          elevation: 12,
           opacity: entranceOpacity,
           transform: [{ translateY: entranceTranslate }],
         },
       ]}
       key={counter.id}
     >
-      <Pressable
-        onPressIn={handleTapFeedback}
-        onPress={handleDecrement}
-        style={({ pressed }) => [
-          styles.button,
-          scaledStyles.button,
-          pressed ? styles.buttonPressed : null,
-          { backgroundColor: accentColor },
-        ]}
-        accessibilityRole="button"
-        accessibilityLabel={t("counter.decrement", { title: counter.title })}
+      <LinearGradient
+        colors={gradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={[styles.counter, scaledStyles.counter, { borderColor: borderColor }]}
       >
-        <Minus color={counter.color} size={22} />
-      </Pressable>
-      <View style={styles.data} className="w-3/5">
-        <Link href={`/counter/${counter.id}`} asChild>
-          <Pressable style={styles.data}>
-            <Text
-              style={[styles.title, scaledStyles.title, { color: counter.color }]}
-              numberOfLines={1}
-              ellipsizeMode="tail">
-              {counter.title}
-            </Text>
-            <Text style={[styles.value, scaledStyles.value, { color: counter.color }]}>
-              {counterValue}
-            </Text>
-          </Pressable>
-        </Link>
-      </View>
-      <Pressable
-        onPressIn={handleTapFeedback}
-        onPress={handleIncrement}
-        style={({ pressed }) => [
-          styles.button,
-          scaledStyles.button,
-          pressed ? styles.buttonPressed : null,
-          { backgroundColor: accentColor },
-        ]}
-        accessibilityRole="button"
-        accessibilityLabel={t("counter.increment", { title: counter.title })}
-      >
-        <Plus color={counter.color} size={22} />
-      </Pressable>
+        <Pressable
+          onPressIn={handleTapFeedback}
+          onPress={handleDecrement}
+          style={({ pressed }) => [
+            styles.button,
+            scaledStyles.button,
+            pressed ? styles.buttonPressed : null,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel={t("counter.decrement", { title: counter.title })}
+        >
+          <LinearGradient
+            colors={buttonGradientColors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.buttonGradientFill}
+          />
+          <Minus color={counter.color} size={22} />
+        </Pressable>
+        <View style={styles.data} className="w-3/5">
+          <Link href={`/counter/${counter.id}`} asChild>
+            <Pressable style={styles.data}>
+              <Text
+                style={[styles.title, scaledStyles.title, { color: counter.color }]}
+                numberOfLines={1}
+                ellipsizeMode="tail">
+                {counter.title}
+              </Text>
+              <Text style={[styles.value, scaledStyles.value, { color: counter.color }]}>
+                {counterValue}
+              </Text>
+            </Pressable>
+          </Link>
+        </View>
+        <Pressable
+          onPressIn={handleTapFeedback}
+          onPress={handleIncrement}
+          style={({ pressed }) => [
+            styles.button,
+            scaledStyles.button,
+            pressed ? styles.buttonPressed : null,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel={t("counter.increment", { title: counter.title })}
+        >
+          <LinearGradient
+            colors={buttonGradientColors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.buttonGradientFill}
+          />
+          <Plus color={counter.color} size={22} />
+        </Pressable>
+      </LinearGradient>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  counterShadow: {
+    borderRadius: 24,
+  },
   counter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     borderRadius: 24,
-    borderWidth: 1,
+    borderWidth: 1.5,
     minHeight: 106,
     paddingHorizontal: 8,
+    overflow: "hidden",
   },
   data: {
     alignItems: "center",
@@ -191,9 +239,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 88,
     justifyContent: "center",
+    overflow: "hidden",
+  },
+  buttonGradientFill: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 16,
   },
   buttonPressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.94 }],
+    opacity: 0.80,
+    transform: [{ scale: 0.93 }],
   },
 });
