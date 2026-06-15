@@ -320,7 +320,7 @@ export function SideMenuDrawer(props) {
                                 <View style={{ gap: 4 }}>
                                     <Text className="text-sm font-bold text-stone-900 dark:text-stone-100" style={{ fontSize: sc(14) }}>{t("feedback.soundVolume")}</Text>
                                     <Slider
-                                        minimumValue={0}
+                                        minimumValue={0.25}
                                         maximumValue={1}
                                         step={0.01}
                                         value={tapSoundVolume}
@@ -336,7 +336,7 @@ export function SideMenuDrawer(props) {
                                 <View style={{ gap: 4 }}>
                                     <Text className="text-sm font-bold text-stone-900 dark:text-stone-100" style={{ fontSize: sc(14) }}>{t("feedback.vibrationStrength")}</Text>
                                     <Slider
-                                        minimumValue={0}
+                                        minimumValue={0.25}
                                         maximumValue={1}
                                         step={0.01}
                                         value={vibrationStrength}

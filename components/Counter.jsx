@@ -1,57 +1,39 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { View, StyleSheet, Text, Pressable, Animated } from "react-native";
 import { Link } from "expo-router";
 import { updateCounterValue } from "../lib/db/database";
-import {
-  playCounterTapFeedback,
-  prepareCounterTapFeedback,
-} from "../lib/counterFeedback";
+import { playCounterTapFeedback, prepareCounterTapFeedback } from "../lib/counterFeedback";
 import { useI18n } from "../lib/i18n";
 import { Plus, Minus } from "./Icons";
 import Color from "color";
-import { LinearGradient } from "expo-linear-gradient";
+import { useColorScheme } from "nativewind";
 import { useCounter } from "../lib/counterContext";
 import { UI_SCALE_OPTIONS } from "../lib/uiScale";
 
-/**
- * Builds safe accent and card colors even when persisted values are malformed.
- * @param {string | null | undefined} backgroundColor
- * @returns {{accentColor: string, cardColor: string}}
- */
-function getSafeCardPalette(backgroundColor) {
+const DARK_BASE = "#0c0a09";
+const LIGHT_BASE = "#ffffff";
+
+function getAccentPalette(backgroundColor, isDarkMode) {
   try {
-    const base = Color(backgroundColor || "#111827");
-    const card = base.desaturate(0.6).lighten(0.4);
-    const cardL = card.lightness();
-    const accent = base.desaturate(0.3);
-    const accentL = accent.lightness();
-    const isDark = card.isDark();
+    const accent = Color(backgroundColor || "#6366f1");
+    const base = Color(isDarkMode ? DARK_BASE : LIGHT_BASE);
+    const cardBg = accent.mix(base, isDarkMode ? 0.85 : 0.92).hex();
+    const borderAlpha = isDarkMode ? 0.50 : 0.30;
+    const borderColor = accent.alpha(borderAlpha).rgb().string();
     return {
       accentColor: accent.hex(),
-      gradientColors: [
-        card.lightness(Math.min(cardL + 22, 94)).hex(),
-        card.hex(),
-        card.lightness(Math.max(cardL - 14, 2)).hex(),
-      ],
-      buttonGradientColors: [
-        accent.lightness(Math.min(accentL + 18, 85)).hex(),
-        accent.hex(),
-        accent.lightness(Math.max(accentL - 14, 3)).hex(),
-      ],
-      borderColor: isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.10)",
-      shadowColor: isDark
-        ? base.lightness(55).saturate(0.3).hex()
-        : "#000000",
-      shadowOpacity: isDark ? 0.65 : 0.22,
+      buttonIconColor: accent.isDark() ? "#ffffff" : "#1a1a1a",
+      cardBg,
+      borderColor,
+      shadowColor: accent.hex(),
     };
   } catch {
     return {
-      accentColor: "#1f2937",
-      gradientColors: ["#4b5563", "#374151", "#1a2233"],
-      buttonGradientColors: ["#4b5563", "#374151", "#1a2233"],
-      borderColor: "rgba(255,255,255,0.12)",
-      shadowColor: "#000000",
-      shadowOpacity: 0.25,
+      accentColor: "#6366f1",
+      buttonIconColor: "#ffffff",
+      cardBg: isDarkMode ? "#1a1a2e" : "#f5f5ff",
+      borderColor: "rgba(99,102,241,0.35)",
+      shadowColor: "#6366f1",
     };
   }
 }
@@ -63,20 +45,30 @@ function getSafeCardPalette(backgroundColor) {
  */
 export function Counter({ counter }) {
   const { t } = useI18n();
+  const { colorScheme } = useColorScheme();
   const { uiScaleIndex } = useCounter();
   const scale = UI_SCALE_OPTIONS[uiScaleIndex] ?? 1;
   const scaledStyles = useMemo(() => ({
-    counter: { minHeight: 106 * scale },
-    title: { fontSize: 16 * scale },
-    value: { fontSize: 38 * scale, lineHeight: 42 * scale },
-    button: { width: 54 * scale, height: 88 * scale },
+    counter: { minHeight: 96 * scale },
+    title: { fontSize: 13 * scale },
+    value: { fontSize: 38 * scale, lineHeight: 44 * scale },
+    button: { width: 52 * scale, height: 52 * scale, borderRadius: 26 * scale },
   }), [scale]);
+
   const [counterValue, setCounterValue] = useState(
     Number.parseInt(counter.value, 10) || 0,
   );
-  const entranceOpacity = useRef(new Animated.Value(0)).current;
-  const entranceTranslate = useRef(new Animated.Value(10)).current;
-  const { accentColor, gradientColors, buttonGradientColors, borderColor, shadowColor, shadowOpacity } = getSafeCardPalette(counter.backgroundColor);
+  const entranceOpacity = useMemo(() => new Animated.Value(0), []);
+  const entranceTranslate = useMemo(() => new Animated.Value(12), []);
+
+  const isDarkMode = colorScheme === "dark";
+
+  const { accentColor, buttonIconColor, cardBg, borderColor, shadowColor } = useMemo(
+    () => getAccentPalette(counter.backgroundColor, isDarkMode),
+    [counter.backgroundColor, isDarkMode],
+  );
+
+  const titleColor = isDarkMode ? "#a8a29e" : "#78716c";
 
   useEffect(() => {
     Animated.parallel([
@@ -105,15 +97,13 @@ export function Counter({ counter }) {
     });
   };
 
-  const handleTapFeedback = () => {
-    void playCounterTapFeedback();
-  };
-
   const handleIncrement = () => {
+    void playCounterTapFeedback();
     handleValueChange(1);
   };
 
   const handleDecrement = () => {
+    void playCounterTapFeedback();
     handleValueChange(-1);
   };
 
@@ -122,131 +112,117 @@ export function Counter({ counter }) {
       style={[
         styles.counterShadow,
         {
-          backgroundColor: gradientColors[1],
+          backgroundColor: cardBg,
           shadowColor: shadowColor,
-          shadowOffset: { width: 0, height: 9 },
-          shadowOpacity: shadowOpacity,
-          shadowRadius: 18,
-          elevation: 12,
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: isDarkMode ? 0.35 : 0.14,
+          shadowRadius: 14,
+          elevation: 8,
           opacity: entranceOpacity,
           transform: [{ translateY: entranceTranslate }],
         },
       ]}
       key={counter.id}
     >
-      <LinearGradient
-        colors={gradientColors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={[styles.counter, scaledStyles.counter, { borderColor: borderColor }]}
+      <View
+        style={[
+          styles.counter,
+          scaledStyles.counter,
+          { borderColor: borderColor, backgroundColor: cardBg },
+        ]}
       >
+
         <Pressable
-          onPressIn={handleTapFeedback}
           onPress={handleDecrement}
           style={({ pressed }) => [
             styles.button,
             scaledStyles.button,
+            { backgroundColor: accentColor },
             pressed ? styles.buttonPressed : null,
           ]}
           accessibilityRole="button"
           accessibilityLabel={t("counter.decrement", { title: counter.title })}
         >
-          <LinearGradient
-            colors={buttonGradientColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.buttonGradientFill}
-          />
-          <Minus color={counter.color} size={22} />
+          <Minus color={buttonIconColor} size={22} />
         </Pressable>
-        <View style={styles.data} className="w-3/5">
-          <Link href={`/counter/${counter.id}`} asChild>
-            <Pressable style={styles.data}>
-              <Text
-                style={[styles.title, scaledStyles.title, { color: counter.color }]}
-                numberOfLines={1}
-                ellipsizeMode="tail">
-                {counter.title}
-              </Text>
-              <Text style={[styles.value, scaledStyles.value, { color: counter.color }]}>
-                {counterValue}
-              </Text>
-            </Pressable>
-          </Link>
-        </View>
+
+        <Link href={`/counter/${counter.id}`} asChild>
+          <Pressable style={styles.dataArea}>
+            <Text
+              style={[styles.title, scaledStyles.title, { color: titleColor }]}
+              numberOfLines={1}
+              ellipsizeMode="tail">
+              {counter.title}
+            </Text>
+            <Text style={[styles.value, scaledStyles.value, { color: accentColor }]}>
+              {counterValue}
+            </Text>
+          </Pressable>
+        </Link>
+
         <Pressable
-          onPressIn={handleTapFeedback}
           onPress={handleIncrement}
           style={({ pressed }) => [
             styles.button,
             scaledStyles.button,
+            { backgroundColor: accentColor },
             pressed ? styles.buttonPressed : null,
           ]}
           accessibilityRole="button"
           accessibilityLabel={t("counter.increment", { title: counter.title })}
         >
-          <LinearGradient
-            colors={buttonGradientColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.buttonGradientFill}
-          />
-          <Plus color={counter.color} size={22} />
+          <Plus color={buttonIconColor} size={22} />
         </Pressable>
-      </LinearGradient>
+      </View>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   counterShadow: {
-    borderRadius: 24,
+    borderRadius: 22,
   },
   counter: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    borderRadius: 24,
+    borderRadius: 22,
     borderWidth: 1.5,
-    minHeight: 106,
-    paddingHorizontal: 8,
+    minHeight: 96,
+    paddingHorizontal: 14,
     overflow: "hidden",
   },
-  data: {
+  dataArea: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    width: "60%",
-    minHeight: 92,
+    minHeight: 80,
+    paddingHorizontal: 8,
   },
   title: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: 13,
+    fontWeight: "600",
     userSelect: "none",
     textAlign: "center",
     width: "100%",
+    letterSpacing: 0.2,
   },
   value: {
     fontSize: 38,
     fontWeight: "900",
-    lineHeight: 42,
+    lineHeight: 44,
     userSelect: "none",
     textAlign: "center",
     width: "100%",
   },
   button: {
-    width: 54,
-    borderRadius: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     alignItems: "center",
-    height: 88,
     justifyContent: "center",
-    overflow: "hidden",
-  },
-  buttonGradientFill: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 16,
   },
   buttonPressed: {
-    opacity: 0.80,
-    transform: [{ scale: 0.93 }],
+    opacity: 0.75,
+    transform: [{ scale: 0.91 }],
   },
 });
