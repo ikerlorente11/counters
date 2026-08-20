@@ -35,3 +35,9 @@ yarn-error.*
 *.tsbuildinfo
 
 android
+
+# Credenciales locales (clave de cuenta de servicio de Play, keystores)
+credentials/
+
+# graphify - grafo regenerable, no fuente
+graphify-out/

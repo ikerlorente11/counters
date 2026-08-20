@@ -49,7 +49,20 @@ This project intentionally keeps exactly three top-level documentation files:
 	- Manual submit if needed: `npx eas-cli@latest submit --platform android --profile production`
 - Deobfuscation support:
 	- Production builds keep `android/app/build/outputs/mapping/release/mapping.txt` as an EAS build artifact for Play Console crash/ANR deobfuscation uploads.
-- Current EAS submit profile targets the Play internal track first.
+- Current EAS submit profile targets the Play production track and uploads via the local service-account key.
+
+## 🔄 Publishing updates
+
+Two paths depending on what changed:
+
+| Change | Command | Reaches the user |
+|---|---|---|
+| JS/assets only (screens, logic, data) | `eas update --branch production -m "message"` | Automatically, after reopening the app twice |
+| Native (modules, permissions, SDK, icons) | bump `version` and `versionCode` in `app.json` → `eas build -p android --profile production --auto-submit` | Through a Play Store update (the AAB is uploaded to Play Console automatically) |
+
+The runtime version follows the app version (`appVersion`): after a new build with a different
+version, old binaries stop receiving OTAs (compatibility guard).
+Auto-submit uses `credentials/play-service-account.json` (gitignored).
 
 ## Release notes 1.1.3
 

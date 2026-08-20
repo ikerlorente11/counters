@@ -2,7 +2,7 @@
   "expo": {
     "name": "Counters",
     "slug": "counters",
-    "version": "1.1.5",
+    "version": "1.1.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -16,7 +16,7 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 13,
+      "versionCode": 14,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#00000000"
@@ -54,6 +54,12 @@
       "eas": {
         "projectId": "b691d3b9-b771-4a17-9cbc-27df1d111406"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b691d3b9-b771-4a17-9cbc-27df1d111406"
     }
   }
 }
