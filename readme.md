@@ -104,3 +104,7 @@ Auto-submit uses `credentials/play-service-account.json` (gitignored).
 - Added archived counter recovery, improved toast feedback, and persisted list/grid layout.
 - Added drag-and-drop counter reordering with persisted display order.
 - Refined annual report UX with collapsible years, scroll-safe modal behavior, and loading skeleton feedback.
+## Licencia
+
+Puedes usar, modificar y compartir este proyecto libremente para fines **no comerciales**.
+No está permitido venderlo ni ganar dinero con él. Ver [LICENSE](LICENSE) (PolyForm Noncommercial 1.0.0).
