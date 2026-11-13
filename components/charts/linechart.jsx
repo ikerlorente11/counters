@@ -110,7 +110,7 @@ export function CustomLineChart({ data, latestValue = 0, resetSignal = 0, animat
             {t("chart.range")}
           </Text>
           <Text className="mt-1 text-sm font-bold text-stone-900 dark:text-stone-100">
-            {bottomValue} to {topValue}
+            {t("chart.rangeValues", { min: bottomValue, max: topValue })}
           </Text>
           <Text className="text-xs text-stone-600 dark:text-stone-300">
             {t("chart.records", { count: safeData.length })}
