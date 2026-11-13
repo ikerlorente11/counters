@@ -1,0 +1,17 @@
+{
+  "name": "Counters",
+  "bg_top": "#2a2624", "bg_bottom": "#0c0a09", "accent": "#2a9d8f",
+  "text": "#ffffff", "subtext": "#d6d3d1",
+  "icon": {"src": "icono-fuente.png", "bg": "#020202"},
+  "feature": {"shot": "01-inicio.jpg", "tagline": ["Hábitos, rachas y ahorro,", "con gráficas de tu progreso"]},
+  "shots": [
+    {"file": "01-inicio.jpg", "caption": "Cuenta lo que quieras con un toque"},
+    {"file": "02-grafica.jpg", "caption": "Mira tu progreso en una gráfica"},
+    {"file": "03-cuadricula-oscuro.jpg", "caption": "Lista, cuadrícula y modo oscuro"},
+    {"file": "04-informe.jpg", "caption": "Tu resumen de cada año, en PDF"},
+    {"file": "05-editar.jpg", "caption": "Elige nombre, valor y colores"},
+    {"file": "06-menu.jpg", "caption": "Recordatorio, sonido y vibración"},
+    {"file": "07-detalle-oscuro.jpg", "caption": "Un registro de cada día, sin esfuerzo"},
+    {"file": "08-archivados.jpg", "caption": "Archiva sin perder tu historial"}
+  ]
+}

@@ -1,0 +1,102 @@
+FICHA DE GOOGLE PLAY · Counters (com.ikerlorente11.counters)
+Idioma: español (es-ES). Los números entre paréntesis son caracteres usados / límite de Play.
+
+========================================================================
+DESCRIPCIÓN BREVE (65/80)
+========================================================================
+Cuenta lo que quieras con un toque y mira tu progreso en gráficas
+
+========================================================================
+DESCRIPCIÓN COMPLETA (2155/4000)
+========================================================================
+Counters es un contador sencillo y personal para llevar la cuenta de cualquier cosa: vasos de agua, días sin fumar, entrenamientos, libros leídos, el ahorro para un viaje o los kilómetros en bici. Crea tantos contadores como quieras, súmales o réstales con un toque y la app guarda cada día su valor para que veas tu evolución en una gráfica. Sin cuentas ni registros: tus datos se quedan en tu teléfono.
+
+CONTADORES A TU MEDIDA
+• Crea contadores con nombre, valor inicial y los colores que elijas en una rueda de color.
+• Botones grandes de + y − en cada tarjeta para cambiar el valor al instante.
+• Edita el valor a mano cuando lo necesites; admite números enteros, también negativos.
+• Sonido y vibración al pulsar, con volumen e intensidad ajustables.
+
+HISTORIAL Y GRÁFICAS
+• Cada cambio queda guardado como el valor de ese día, sin que tengas que hacer nada más.
+• Gráfica de tendencia de cada contador con rangos de 7 días, 30 días, 90 días, 6 meses o todo el historial.
+• Valor actual, mínimo y máximo del periodo y número de registros de un vistazo.
+• Toca la gráfica para ver el valor exacto de un día concreto.
+• Lista completa de registros con su fecha y su valor.
+
+INFORME ANUAL
+• Resumen con el valor con el que cada contador cerró cada año.
+• Copia al portapapeles el informe completo o solo un año.
+• Guárdalo o compártelo en PDF.
+
+ORGANÍZALOS A TU MANERA
+• Vista en lista o en cuadrícula de dos columnas.
+• Mantén pulsado un contador y arrástralo para cambiar el orden.
+• Archiva los contadores que ya no uses y recupéralos cuando quieras, con todo su historial.
+• Pon a cero un contador o todos a la vez sin perder el historial.
+
+RECORDATORIO DIARIO
+• Aviso opcional cada día a la hora que elijas para no olvidarte de actualizar tus contadores.
+
+COMODIDAD Y ACCESIBILIDAD
+• Tema claro y tema oscuro.
+• Disponible en español e inglés.
+• Cinco tamaños de interfaz para agrandar tarjetas, números y textos.
+
+PRIVACIDAD
+• Sin cuenta y sin registro.
+• Sin anuncios.
+• Tus contadores y su historial se guardan solo en tu dispositivo.
+
+Úsala para hábitos, salud, deporte, estudio, ahorro, colecciones, rachas o cualquier cosa que quieras contar.
+
+========================================================================
+NOTAS DE LA VERSIÓN (máx. 500 cada una; de la más nueva a la más antigua)
+========================================================================
+
+--- 1.1.6 (versionCode 14) · 168/500 ---
+• La app puede recibir pequeñas mejoras y correcciones de forma automática, sin esperar a una actualización completa desde la tienda.
+• Mejoras internas de estabilidad.
+
+--- 1.1.5 (versionCode 13) · 69/500 ---
+• Compatibilidad con Android 16.
+• Mejoras internas y de rendimiento.
+
+--- 1.1.4 (versionCode 12) · 279/500 ---
+• Nuevo diseño de las tarjetas: cada contador se tiñe de su color, con botones + y − redondos y más grandes.
+• El sonido al pulsar ya suena desde el primer toque.
+• Desplazarte por la lista o arrastrar un contador ya no hace sonar ni vibrar el teléfono.
+• Vibración más uniforme.
+
+--- 1.1.3 (versionCode 11) · 149/500 ---
+• Nuevo icono.
+• Tarjetas y botones con efecto de relieve.
+• Corregido el menú lateral, que quedaba tapado por la barra de estado en algunos móviles.
+
+--- 1.1.2 (versionCode 10) · 378/500 ---
+• Pon a cero un contador o todos a la vez sin perder el historial.
+• Nuevo menú lateral con todos los ajustes en un solo sitio.
+• Sonido y vibración al pulsar + y −, con volumen e intensidad ajustables.
+• Accesibilidad: elige entre cinco tamaños de interfaz.
+• Toca el título para volver al inicio desde cualquier pantalla.
+• La barra de estado se adapta al tema claro y oscuro.
+
+--- 1.1.1 (versionCode 9) · 122/500 ---
+• Recordatorio diario opcional para actualizar tus contadores a la hora que elijas.
+• Nuevo icono.
+• Gráficas más rápidas.
+
+--- 1.1.0 (versionCode 8) · 353/500 ---
+• La app ya está en español e inglés.
+• Informe anual: copia el resumen de cada año o guárdalo en PDF.
+• Vista en lista o en cuadrícula de dos columnas.
+• Mantén pulsado un contador y arrástralo para reordenar.
+• Archiva contadores y recupéralos cuando quieras.
+• Gráficas con rangos de 7 días a todo el historial.
+• Diseño renovado y avisos más claros.
+
+--- 1.0.1 (versionCode 7) · 88/500 ---
+• Actualización de componentes internos para mejorar la compatibilidad y la estabilidad.
+
+--- 1.0.0 · 157/500 ---
+• Primera versión: crea contadores con nombre y colores, súmales o réstales con un toque y consulta su historial en una gráfica. Incluye tema claro y oscuro.
